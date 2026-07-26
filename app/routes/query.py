@@ -1,9 +1,4 @@
-"""The main endpoint: answer a question about the document.
-
-The response body is the object you submit. After you run each of the nine
-challenge questions through here, copy the JSON response into the matching
-`results/level-N/qM.json`. See docs/06_submission.md.
-"""
+"""The main endpoint: answer a question about the document."""
 
 from __future__ import annotations
 
@@ -17,13 +12,20 @@ router = APIRouter(tags=["query"])
 
 @router.post("/query", response_model=QueryResponse)
 def query(req: QueryRequest) -> QueryResponse:
-    """Answer a question, grounded in the ingested document.
+    """Ask a question about the ingested document.
 
-    - Level 1: ask a standalone question.
-    - Level 2: send follow-ups with the SAME `conversation_id` as the question they
-      build on, so your system has the history.
-    - Level 3: whole-document questions — the baseline will struggle; this is where
-      you build (see the TODOs in app/rag/).
+    Send just the **question** and its **level** (1, 2 or 3). The system assigns an id and
+    threads the conversation for you — you do not pass a conversation id.
+
+    - **Level 1 — retrieval.** A standalone question. The baseline handles these.
+    - **Level 2 — memory.** A follow-up ("and how large is it?"). All level-2 questions
+      share one conversation, so your system can use the earlier turns. Resolving the
+      follow-up before retrieval is the job (see `rewrite_query` in `app/rag/retrieve.py`).
+    - **Level 3 — whole-document.** Needs evidence combined across the document; the
+      baseline will struggle — this is where you build (`TODO(level-3)` in `app/rag/`).
+
+    The full response is returned **and** written to `data/out/` as a JSON file. To submit,
+    copy your preferred answers from `data/out/` into `submission/`. See `submission/README.md`.
     """
     if not req.question.strip():
         raise HTTPException(status_code=422, detail="question must not be empty")

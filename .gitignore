@@ -12,5 +12,10 @@ __pycache__/
 .idea/
 .vscode/
 
-# NOTE: data/ (the PDF) and results/ (your answers) ARE committed on purpose.
-# The PDF is the shared corpus; your results/*.json are your deliverable.
+# data/out is scratch (per-query dumps); keep the folder, ignore its contents.
+data/out/*
+!data/out/.gitkeep
+
+# COMMITTED on purpose:
+#   - data/in/  (your chosen PDF — the organisers check answers against it)
+#   - submission/  (your team.json + the nine answers — your deliverable)

@@ -29,16 +29,16 @@ Each criterion is scored **0–100**; the weighted sum (weights sum to 100) is y
 | Level 2 answers (q4–q6) | 10 | Follow-ups answered correctly using the conversation, not as standalone queries. |
 | Level 3 answers (q7–q9) | 12 | Whole-document answers that genuinely combine evidence from across the document. |
 
-### Implementation — 34%
+### Implementation — 35%
 
 | Criterion | Weight | What it measures |
 |---|---|---|
-| Requirements & API contract | 6 | Python/FastAPI, uv, Docker + Qdrant, the `/ingest` + `/query` contract, a real LLM interface. |
+| Requirements & API contract | 5 | Python/FastAPI, uv, Docker + Qdrant, the `/ingest` + `/query` contract, a real LLM interface. |
 | Retrieval pipeline | 7 | Extraction, chunking, embeddings and search beyond the naive baseline. |
-| Conversational memory | 7 | History-aware retrieval — resolving a follow-up into a standalone query before retrieving. |
+| **Conversational memory** | **10** | Maintaining conversation context across turns — the axis this hackathon is named for. History-aware retrieval that resolves a follow-up into a standalone query before retrieving. |
 | Whole-document reasoning | 8 | Multi-query, agentic retrieval, a second index, or structure-aware table handling. |
 | Code quality & structure | 3 | Clean, modular, readable, reasonably typed. |
-| Architecture & design | 3 | Coherent design; sensible separation; room to extend. |
+| Architecture & design | 2 | Coherent design; sensible separation; room to extend. |
 
 ### Rigor — 20%
 
@@ -49,13 +49,13 @@ Each criterion is scored **0–100**; the weighted sum (weights sum to 100) is y
 | Technical note | 5 | Claims backed by artefacts; technically accurate; low filler. |
 | Reproducibility | 4 | Runs from the documented steps; deterministic enough to trust. |
 
-### Integrity — 16%
+### Integrity — 15%
 
 | Criterion | Weight | What it measures |
 |---|---|---|
 | Level-appropriate approach | 5 | Respecting the complexity split. **Bonus** for exceeding a level; **penalty** for trivialising one. |
 | Integrity — no gaming | 8 | No hardcoded/question-specific answers, no fabricated citations, no wrapper-only shortcut. |
-| Documentation & usability | 3 | README, run steps, meaningful comments. |
+| Documentation & usability | 2 | README, run steps, meaningful comments. |
 
 ## How the two halves combine
 

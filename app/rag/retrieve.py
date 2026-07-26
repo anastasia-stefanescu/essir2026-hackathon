@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..llm.base import Message
-from ..llm.factory import get_client
 from ..vectorstore.qdrant_store import get_store
+from .embeddings import get_embedder
 
 
 @dataclass
@@ -33,7 +33,7 @@ def rewrite_query(question: str, history: list[Message]) -> str:
 
 
 def retrieve(question: str, top_k: int, history: list[Message] | None = None) -> list[Context]:
-    client = get_client()
+    embedder = get_embedder()
     store = get_store()
 
     query = rewrite_query(question, history or [])
@@ -43,7 +43,7 @@ def retrieve(question: str, top_k: int, history: list[Message] | None = None) ->
     #   reference on p.90"). Consider multi-query fan-out, iterative/agentic retrieval
     #   (retrieve -> reason -> retrieve again), or a second index (e.g. a graph or a
     #   per-section summary index) alongside this one.
-    vector = client.embed([query])[0]
+    vector = embedder.embed([query], is_query=True)[0]
     hits = store.search(vector, top_k)
 
     return [

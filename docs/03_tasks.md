@@ -1,11 +1,14 @@
 # 03 — Tasks: the three levels
 
-You answer nine questions — three at each of three levels. The levels rise in difficulty and
-map onto the three things a document assistant must do: **retrieve**, **remember**, and
-**reason across the whole document**. They are cumulative: Level 2 assumes Level 1 works,
-Level 3 assumes Level 2 works.
+You answer nine questions — three at each of three levels — about the document **you chose** and
+put in `data/in/`. **You write the questions yourself** (three per level); see
+[`../questions/questions.md`](../questions/questions.md) for the kind of question each level wants.
+The levels rise in difficulty and map onto the three things a document assistant must do:
+**retrieve**, **remember**, and **reason across the whole document**. They are cumulative: Level 2
+assumes Level 1 works, Level 3 assumes Level 2 works.
 
-Build in order. A solid Level 1 is worth more than a broken Level 3.
+Build in order. A solid Level 1 is worth more than a broken Level 3. Your nine answers go in
+`submission/` (q1–q3 Level 1, q4–q6 Level 2, q7–q9 Level 3).
 
 Where each capability lives in the code is called out below — every improvement point in the
 scaffold carries a matching `TODO(level-N)` comment.
@@ -34,7 +37,8 @@ failed citation means the answer cannot be confirmed.
 
 **Goal**: answer a follow-up that is meaningless without the conversation it belongs to.
 
-This is the level the challenge is named for. The three questions form a short thread:
+This is the level the challenge is named for. Your three level-2 questions form a short thread —
+for example:
 
 ```
 q4  What limitation do the authors acknowledge about their method?
@@ -42,8 +46,9 @@ q5  Why does that happen?                    <- "that" = the limitation from q4
 q6  And how do they propose to address it?   <- no retrievable content on its own
 ```
 
-Send q4, q5, q6 to `POST /query` with the **same `conversation_id`** (`level-2`), in order,
-so your system has the history when the follow-up arrives.
+Send your three level-2 questions to `POST /query` at `level: 2`, in order. The system threads
+them into one conversation automatically (you don't pass any id), so your system has the history
+when the follow-up arrives.
 
 The trap: embedding *"Why does that happen?"* as written retrieves noise — the string has no
 searchable content. The fix is to **resolve the follow-up against the history into a

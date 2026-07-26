@@ -2,49 +2,28 @@
 
 The hackathon runs across the week. These are the touchpoints that matter for your submission.
 
-## Monday — you get the task
+| When | What | What you do |
+|---|---|---|
+| **Monday** | You get the task | Fork the repo, get it running (`docker compose up`), **choose your document** and put it in `data/in/`. Read [`01_overview.md`](01_overview.md) and [`03_tasks.md`](03_tasks.md). |
+| **Tuesday** | Questions | Ask the organisers anything about the task, rules or scoring. Or use the ready-made LLM advisor ([`08_advisor.md`](08_advisor.md)) — it helps with strategy and debugging (it can't see your document or give answers). |
+| Wed–Thu | Build | Work through the three levels. Write your own nine questions about your document. |
+| **Thursday** | Compliance submission | Push what you have and tell us — a **dress rehearsal, not graded**. Optionally run the validation skill first (see below) so we can confirm your submission is well-formed before the real deadline. |
+| **Friday, 12:00** | **Final push deadline** | Commit and push everything — code, `submission/`, technical note. Whatever is on your default branch at 12:00 is what we evaluate. |
+| **Friday** (after) | Presentation | Present and defend your system to the jury. |
 
-The challenge opens. You receive the scaffold repository, the corpus PDF and the nine questions.
-Fork the repo, get it running (`docker compose up`), and split the work across your team. Start
-with [`01_overview.md`](01_overview.md) and [`03_tasks.md`](03_tasks.md).
+## The validation skill (optional, recommended)
 
-## Tuesday — questions
-
-Bring questions about the task, the rules or the scoring to the organisers. At any point you can
-also use the ready-made strategy advisor we prepared — paste it into your own LLM and it will
-help you plan and debug: [`08_advisor.md`](08_advisor.md). (The advisor never sees the document
-and cannot give you answers; it is for strategy and engineering.)
-
-## Thursday — compliance submission
-
-Push what you have so far and tell us. This is a **dress rehearsal, not graded**: we confirm your
-submission is well-formed — the repo is forked correctly, your `results/` are in the right shape,
-and the validator passes:
-
-```bash
-python tools/validate_results.py
-git add . && git commit -m "compliance submission" && git push
-```
-
-Getting this right on Thursday means Friday is just your final push, with no surprises.
-
-## Friday — final push by 12:00
-
-**Push your latest changes to git by 12:00.** That is the deadline. Whatever is on your default
-branch at 12:00 is what we evaluate — code, `results/`, and your technical note.
-
-```bash
-python tools/validate_results.py        # last check
-git add . && git commit -m "final submission" && git push
-```
-
-Later on Friday you **present and defend your system to the jury**.
+Before the Thursday and Friday pushes, check your submission is complete with the AI skill in
+[`../ai_skill/VALIDATE_SUBMISSION.md`](../ai_skill/VALIDATE_SUBMISSION.md) — paste it into Claude
+Code (or Codex, Cursor, …) and it verifies your team details and nine answers are filled in, your
+PDF is in `data/in/`, and your code has moved on from the skeleton. It only reads; it changes
+nothing.
 
 ## Deadlines, condensed
 
 | What | When |
 |---|---|
-| Task released (fork, PDF, questions) | Monday |
+| Task released (fork + choose document) | Monday |
 | Compliance submission (dress rehearsal) | Thursday |
 | **Final git push** | **Friday, 12:00** |
 | Presentation to the jury | Friday |

@@ -19,17 +19,12 @@ before the Friday 12:00 deadline. What matters is what you built, not when you c
 
 ## Code evaluation — 50%
 
-Your repository is scored against sixteen criteria in four groups (each criterion 0–100; the
-weighted sum is your code score). In full in [`rubric.md`](rubric.md); in brief:
+Your repository is scored against sixteen criteria in four groups — **answer accuracy**,
+**implementation**, **rigor** and **integrity** — each scored 0–100, weighted into a single code
+score. **The criteria and their weights live in one place: [`rubric.md`](rubric.md).** Read it;
+it is the authority, and this page won't repeat the numbers.
 
-| Group | Weight | Covers |
-|---|---|---|
-| **Answer accuracy** | 30% | Are the nine answers correct and grounded, per level (q1–q3, q4–q6, q7–q9)? |
-| **Implementation** | 34% | The API contract, retrieval, memory, whole-document reasoning, code quality, design. |
-| **Rigor** | 20% | Innovation, measuring your own system, the technical note, reproducibility. |
-| **Integrity** | 16% | Respecting the levels; **no** hardcoding / gaming / fabricated citations; documentation. |
-
-Two things worth internalising, because they move the most marks:
+Two things there move the most marks, so they're worth internalising up front:
 
 - **Grounding.** Every answer should carry a verbatim `evidence_quote` and its `page`. A quote
   that does not appear in the document counts against both the answer criteria and integrity — an
@@ -59,7 +54,7 @@ beats a slick one you cannot.
 | What | Feeds |
 |---|---|
 | Your code (in the fork) | Implementation, Rigor, Integrity |
-| `results/` — the nine answers | Answer accuracy |
+| `submission/` — the nine answers | Answer accuracy |
 | `TECHNICAL_NOTE.md` | Rigor (the technical-note criterion) |
 | The presentation | The jury 50% |
 
@@ -67,7 +62,7 @@ See [`06_submission.md`](06_submission.md).
 
 ## Determinism and appeals
 
-- Each answer is checked against the corpus PDF; each criterion score is anchored to concrete
-  evidence in your repo, recorded in the feedback you receive.
+- Each answer is checked against your own document (the PDF in `data/in/`); each criterion score
+  is anchored to concrete evidence in your repo, recorded in the feedback you receive.
 - You may query a score within **30 minutes** of results with `(team, criterion, reasoning)`. The
   content of the document and the jury's marks are not appealable.

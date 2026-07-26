@@ -69,6 +69,26 @@ the technical note) is a fifth of it. Run the questions, look at where they fail
 ("added query rewriting → fixed 2 of 3 Level-2 questions"), and write the number down. An honest
 negative result scores above an unexamined claim. Start the note on Wednesday.
 
+## 10. Stand on open-source shoulders — don't reinvent the wheel
+
+This is an open-source challenge, and there's a rich ecosystem of free tools. Reach for them
+before writing everything from scratch:
+
+- **Parsing / extraction**: PyMuPDF, pdfplumber, [Docling](https://github.com/DS4SD/docling),
+  [GROBID](https://github.com/kermitt2/grobid), [Marker](https://github.com/VikParuchuri/marker)
+  read messy PDFs far better than the default.
+- **Retrieval / RAG**: LlamaIndex, Haystack, LangChain, sentence-transformers, rerankers, BM25
+  (`rank-bm25`) for hybrid search.
+- **Knowledge / graphs**: build a graph index for Level-3 (e.g. with a graph store), or explore
+  your document in [Obsidian](https://obsidian.md) or a tool like **graphify** to see its structure.
+- **Local models**: LM Studio, Ollama, vLLM — run strong open models on your own machine.
+- **AI coding**: Claude Code, [opencode](https://github.com/opencode-ai/opencode), Codex, Cursor —
+  let them write the glue while you think about the design.
+
+Using a good open tool well is a *strength*, not a shortcut — just be able to explain what it does
+and why you chose it. (What you can't do is wrap a commercial "chat with your PDF" product and call
+it your system — that's the one thing the integrity criterion is watching for.)
+
 ## A workable 12-hour plan
 
 One way to spend the time; not required.

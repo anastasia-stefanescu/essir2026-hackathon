@@ -12,10 +12,12 @@ router = APIRouter(tags=["ingest"])
 
 @router.post("/ingest", response_model=IngestResponse)
 def ingest_document(req: IngestRequest) -> IngestResponse:
-    """Parse, chunk, embed and index a PDF from `data/`.
+    """Parse, embed and index the PDF sitting in `data/in/`.
 
-    Run this once (per document, or after you change chunking/embeddings) before
-    querying. Pass `reset: true` to rebuild the collection from scratch.
+    Run this once before querying (and again after you change chunking or embeddings).
+    By default it indexes **one vector per page** — there is no chunking yet; that is one
+    of the first things you will build (`app/rag/chunking.py`). Pass `reset: true` to
+    rebuild the collection from scratch, and `filename` to pick a specific PDF in `data/in/`.
     """
     try:
         return ingest(filename=req.filename, reset=req.reset)
