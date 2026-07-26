@@ -1,0 +1,16 @@
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+
+# Local secrets — .env.example IS committed, .env is NOT
+.env
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# NOTE: data/ (the PDF) and results/ (your answers) ARE committed on purpose.
+# The PDF is the shared corpus; your results/*.json are your deliverable.

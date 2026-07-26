@@ -1,0 +1,74 @@
+{
+  "info": {
+    "name": "The Fourth Turn",
+    "description": "The Fourth Turn RAG backend — health, ingest and query. Import into Postman (or Bruno/Insomnia), set {{base_url}} if needed, and run in order: Ingest, then the Query requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{base_url}}/health" }
+    },
+    {
+      "name": "Ready (checks Qdrant)",
+      "request": { "method": "GET", "url": "{{base_url}}/health/ready" }
+    },
+    {
+      "name": "List collections",
+      "request": { "method": "GET", "url": "{{base_url}}/collections" }
+    },
+    {
+      "name": "Ingest the PDF",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/ingest",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"filename\": null,\n  \"reset\": false\n}"
+        },
+        "description": "Index the first *.pdf in data/. Pass \"reset\": true to rebuild the collection."
+      }
+    },
+    {
+      "name": "Query — Level 1 (standalone)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/query",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question_id\": \"q1\",\n  \"level\": 1,\n  \"question\": \"<the released question text>\",\n  \"conversation_id\": \"level-1\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Query — Level 2 (follow-up, shared conversation)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/query",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question_id\": \"q5\",\n  \"level\": 2,\n  \"question\": \"<follow-up that depends on q4>\",\n  \"conversation_id\": \"level-2\"\n}"
+        },
+        "description": "Send q4, q5, q6 in order with the same conversation_id so your system has the history."
+      }
+    },
+    {
+      "name": "Query — Level 3 (whole-document)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/query",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question_id\": \"q7\",\n  \"level\": 3,\n  \"question\": \"<question that spans the whole document>\",\n  \"conversation_id\": \"level-3\"\n}"
+        }
+      }
+    }
+  ]
+}

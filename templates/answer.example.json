@@ -1,0 +1,22 @@
+{
+  "question_id": "q1",
+  "level": 1,
+  "question": "The exact text of the question, as released.",
+  "answer": "Your system's answer.",
+  "conversation_id": "level-1",
+  "sources": [
+    {
+      "page": 12,
+      "quote": "a verbatim span copied from the PDF that supports the answer",
+      "score": 0.83
+    }
+  ],
+  "diagnostics": {
+    "provider": "ollama",
+    "chat_model": "llama3.1",
+    "embedding_model": "nomic-embed-text",
+    "retrieved_chunks": 5,
+    "tokens": null,
+    "latency_ms": 1840
+  }
+}
