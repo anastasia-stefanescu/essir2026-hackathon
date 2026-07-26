@@ -3,7 +3,7 @@
 This hackathon is organised by the **AI Multimedia Lab**.
 
 - **Lab website** — <https://aimultimedialab.ro/>
-- **Hackathon lead** — Lucian Gruia — <https://www.linkedin.com/in/luciangruiaro/>
+- **Hackathon challenge coordinator** — Lucian Gruia — <https://www.linkedin.com/in/luciangruiaro/>
 
 ## During the hackathon
 
