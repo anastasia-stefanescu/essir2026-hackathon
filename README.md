@@ -51,6 +51,10 @@ locally out of the box (sentence-transformers); the LLM works with **LM Studio**
 
 ## Quick start
 
+Download ollama: [ollama.com/download/mac](https://ollama.com/download/mac)
+
+Get the model running: **ollama run gemma4:e4b**
+
 ```bash
 # 1. Fork on GitHub, then clone your fork
 git clone https://github.com/<your-team>/essir2026-aim-hackathon-participants.git
@@ -66,6 +70,10 @@ cp ~/Downloads/your-document.pdf data/in/
 docker compose up --build
 #    app     -> http://localhost:8791      (Swagger UI at /docs)
 #    qdrant  -> http://localhost:6391      (dashboard at /dashboard)
+
+# Prefer to run it without docker?
+uv sync
+uv run uvicorn app.main:app --port 8791 --reload    # needs a reachable Qdrant + LLM
 
 # 5. Index your PDF, then ask a question (just question + level)
 curl -s localhost:8791/ingest -H 'content-type: application/json' -d '{}'
