@@ -28,8 +28,15 @@ SYSTEM_PROMPT = (
 )
 
 
-def _build_messages(question: str, contexts: list[Context], history: list[Message]) -> list[Message]:
-    context_block = "\n\n".join(f"[page {c.page}] {c.text}" for c in contexts) or "(no context retrieved)"
+def _build_messages(
+    question: str, contexts: list[Context], history: list[Message]
+) -> list[Message]:
+    context_block = (
+        "\n\n".join(
+            f"[page {c.page}]{f' [{c.title}]' if c.title else ''} {c.text}" for c in contexts
+        )
+        or "(no context retrieved)"
+    )
     messages: list[Message] = [{"role": "system", "content": SYSTEM_PROMPT}]
     # Prior turns give the model the conversation so far (Level 2). Retrieval still
     # needs the rewritten query — history in the prompt is necessary but not sufficient.
@@ -52,7 +59,7 @@ def _sources_from(contexts: list[Context]) -> list[Source]:
         quote = c.text.strip().replace("\n", " ")
         if len(quote) > 300:
             quote = quote[:300].rsplit(" ", 1)[0] + "…"
-        out.append(Source(page=c.page, quote=quote, score=round(c.score, 4)))
+        out.append(Source(page=c.page, quote=quote, score=round(c.score, 4), title=c.title or None))
     return out
 
 
@@ -88,8 +95,7 @@ def answer(req: QueryRequest) -> QueryResponse:
         # Degrade rather than 500: return the retrieved evidence so the pipeline is
         # still usable (and debuggable) without a running LLM.
         answer_text = (
-            f"[LLM unavailable: {e}] Retrieved context is attached as sources; "
-            "no generated answer."
+            f"[LLM unavailable: {e}] Retrieved context is attached as sources; no generated answer."
         )
 
     memory.append(conversation_id, req.question, answer_text)
@@ -107,7 +113,7 @@ def answer(req: QueryRequest) -> QueryResponse:
             chat_model=settings.chat_model,
             embedding_model=settings.embedding_model,
             retrieved_chunks=len(contexts),
-            tokens=None,          # TODO: report real token usage if your provider returns it
+            tokens=None,  # TODO: report real token usage if your provider returns it
             latency_ms=latency_ms,
             timestamp=now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         ),

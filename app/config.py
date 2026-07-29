@@ -12,17 +12,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     # --- Chat provider (the model that writes answers) ----------------------
     # One of: "lmstudio", "ollama", "litellm". See app/llm/factory.py and .env.example.
     llm_provider: str = "lmstudio"
     chat_model: str = "google/gemma-4-e2b"
 
-    ollama_base_url: str = "http://localhost:11434"     # keep Ollama's default port
-    lmstudio_base_url: str = "http://localhost:1234"    # keep LM Studio's default port
+    ollama_base_url: str = "http://localhost:11434"  # keep Ollama's default port
+    lmstudio_base_url: str = "http://localhost:1234"  # keep LM Studio's default port
     litellm_api_base: str | None = None
     litellm_api_key: str | None = None
 
@@ -44,20 +42,20 @@ class Settings(BaseSettings):
     qdrant_local_path: str | None = None  # set to e.g. "./data/qdrant" to skip Docker
 
     # --- Retrieval ----------------------------------------------------------
-    top_k: int = 5                 # how many results a query retrieves
+    top_k: int = 5  # how many results a query retrieves
 
     # Chunking is OFF by default: ingest indexes one vector per page (see
     # app/rag/chunking.py). When you implement real chunking, these are your dials.
-    chunk_size: int = 800          # characters per chunk (once you chunk)
-    chunk_overlap: int = 150       # characters shared between neighbours
+    chunk_size: int = 800  # characters per chunk (once you chunk)
+    chunk_overlap: int = 150  # characters shared between neighbours
 
     # --- PDF extraction -----------------------------------------------------
-    # One of: "pypdf", "pymupdf". See app/rag/ingest.py.
-    pdf_reader: str = "pypdf"
+    # One of: "pypdf", "pymupdf", "pdfplumber", "marker". See app/rag/ingest.py.
+    pdf_reader: str = "marker"
 
     # --- Data folders -------------------------------------------------------
-    in_dir: str = "data/in"        # put the PDF here; /ingest reads from it
-    out_dir: str = "data/out"      # every /query answer is written here as JSON
+    in_dir: str = "data/in"  # put the PDF here; /ingest reads from it
+    out_dir: str = "data/out"  # every /query answer is written here as JSON
 
     request_timeout: float = 120.0
 

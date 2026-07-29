@@ -12,6 +12,8 @@ dependencies = [
     "qdrant-client>=1.11",
     "pypdf>=4.2",
     "pymupdf>=1.24",
+    "pdfplumber>=0.11",
+    "marker-pdf>=1.0",
     # Local embeddings out of the box (intfloat/multilingual-e5-large). Pulls torch,
     # so the first install is large. Swap the model, or switch embedding_backend to
     # "provider", if you'd rather not carry it — see app/rag/embeddings.py.

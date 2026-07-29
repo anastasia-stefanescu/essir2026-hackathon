@@ -16,6 +16,9 @@ __pycache__/
 data/out/*
 !data/out/.gitkeep
 
+# Qdrant local storage (when running without Docker)
+data/qdrant/
+
 # COMMITTED on purpose:
 #   - data/in/  (your chosen PDF — the organisers check answers against it)
 #   - submission/  (your team.json + the nine answers — your deliverable)

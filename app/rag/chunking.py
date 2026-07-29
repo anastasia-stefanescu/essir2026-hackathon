@@ -10,18 +10,104 @@ Implementing real chunking is one of the first things that will improve your Lev
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 
 @dataclass
 class Chunk:
     text: str
-    page: int      # 1-indexed
-    index: int     # position within the document
+    page: int  # 1-indexed
+    index: int  # position within the document
+    title: str = ""  # breadcrumb path, e.g. "2. Methods > 2.2.1. Annotation"
 
 
-def chunk_pages(pages: list[str]) -> list[Chunk]:
-    """Default: one chunk per page (no chunking).
+# Matches any markdown heading line: #, ##, ###, etc.
+_HEADING_RE = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
+# Matches a footnote line moved to end of page by _reflow_marker_page: <sup>N</sup>...
+_FOOTNOTE_LINE_RE = re.compile(r"^(<sup>\d+<\/sup>.+)$", re.MULTILINE)
+# Matches an inline footnote reference inside paragraph body: <sup>N</sup>
+_FOOTNOTE_REF_RE = re.compile(r"<sup>(\d+)<\/sup>")
+# Matches an inline label at the start of a paragraph, e.g. "Objective:", "Methods:"
+_INLINE_LABEL_RE = re.compile(r"^([A-Z][A-Za-z /\-]{0,40}):")
+
+
+def _sliding_window(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
+    """Split text into overlapping character windows."""
+    if len(text) <= chunk_size:
+        return [text]
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunks.append(text[start:end])
+        start += chunk_size - chunk_overlap
+    return chunks
+
+
+def _chunk_markdown(pages: list[str], chunk_size: int, chunk_overlap: int) -> list[Chunk]:
+    """Structure-aware chunking for Marker markdown output.
+
+    Each chunk gets a breadcrumb prefix showing its position in the document
+    (e.g. "2. Methods > 2.2. Detection > 2.2.1. Annotation") and any footnotes
+    referenced inline are appended at the end of the chunk.
+    """
+    # Build a page-lookup so we can assign page numbers to paragraphs.
+    # Each page is a string; we tag paragraphs with the page they came from.
+    tagged: list[tuple[int, str]] = []  # (page_no, paragraph_text)
+    for page_no, page_text in enumerate(pages, start=1):
+        # Separate footnote lines from body (already reflowed by _reflow_marker_page)
+        footnotes = dict(
+            (m.group(1).lstrip("<sup>").rstrip("</sup>"), m.group(0))  # num -> full line
+            for m in re.finditer(r"^<sup>(\d+)<\/sup>.+$", page_text, re.MULTILINE)
+        )
+        body = _FOOTNOTE_LINE_RE.sub("", page_text)
+        for para in body.split("\n\n"):
+            para = para.strip()
+            if para:
+                tagged.append((page_no, para, footnotes))  # type: ignore[arg-type]
+
+    # Walk tagged paragraphs, maintaining a heading breadcrumb stack.
+    breadcrumb_stack: list[tuple[int, str]] = []  # (level, title)
+    chunks: list[Chunk] = []
+    idx = 0
+
+    for page_no, para, footnotes in tagged:  # type: ignore[misc]
+        heading_match = _HEADING_RE.match(para)
+        if heading_match:
+            level = len(heading_match.group(1))
+            title = heading_match.group(2).strip()
+            breadcrumb_stack = [(l, t) for l, t in breadcrumb_stack if l < level]
+            breadcrumb_stack.append((level, title))
+            breadcrumb = " ".join(f"[{t}]" for _, t in breadcrumb_stack)
+            chunks.append(Chunk(text=breadcrumb, page=page_no, index=idx, title=breadcrumb))
+            idx += 1
+            continue
+
+        breadcrumb = " ".join(f"[{t}]" for _, t in breadcrumb_stack)
+        ref_nums = _FOOTNOTE_REF_RE.findall(para)
+        matched_footnotes = [footnotes[n] for n in ref_nums if n in footnotes]
+        body = para
+        if matched_footnotes:
+            body = para + "\n\n" + "\n".join(matched_footnotes)
+
+        inline_label = _INLINE_LABEL_RE.match(para)
+        title = f"{breadcrumb} [{inline_label.group(1)}]" if inline_label else breadcrumb
+        full_text = f"{breadcrumb} {body}" if breadcrumb else body
+        for window in _sliding_window(full_text, chunk_size, chunk_overlap):
+            chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
+            idx += 1
+
+    return chunks
+
+
+def chunk_pages(
+    pages: list[str],
+    chunk_size: int = 800,
+    chunk_overlap: int = 150,
+    is_markdown: bool = False,
+) -> list[Chunk]:
+    """Split pages into retrievable chunks.
 
     TODO(level-1): THIS IS WHERE CHUNKING GOES, and right now there is none. Split each
       page into retrievable units — by tokens, by sentences/paragraphs, or structure-aware
@@ -32,13 +118,21 @@ def chunk_pages(pages: list[str]) -> list[Chunk]:
 
     The settings `chunk_size` / `chunk_overlap` exist for when you implement this — they are
     unused by the baseline.
+
+    When is_markdown=True (Marker output), uses structure-aware splitting on
+    headings and paragraphs with breadcrumb prefixes. Otherwise falls back to
+    sliding-window character splitting with overlap.
     """
+    if is_markdown:
+        return _chunk_markdown(pages, chunk_size, chunk_overlap)
+
     chunks: list[Chunk] = []
     idx = 0
     for page_no, text in enumerate(pages, start=1):
         text = text.strip()
         if not text:
             continue
-        chunks.append(Chunk(text=text, page=page_no, index=idx))
-        idx += 1
+        for window in _sliding_window(text, chunk_size, chunk_overlap):
+            chunks.append(Chunk(text=window, page=page_no, index=idx))
+            idx += 1
     return chunks

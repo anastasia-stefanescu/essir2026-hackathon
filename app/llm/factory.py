@@ -22,10 +22,16 @@ def get_client():
     if provider == "ollama":
         return OllamaClient(s.ollama_base_url, s.chat_model, s.embedding_model, s.request_timeout)
     if provider == "lmstudio":
-        return LMStudioClient(s.lmstudio_base_url, s.chat_model, s.embedding_model, s.request_timeout)
+        return LMStudioClient(
+            s.lmstudio_base_url, s.chat_model, s.embedding_model, s.request_timeout
+        )
     if provider == "litellm":
         return LiteLLMClient(
-            s.chat_model, s.embedding_model, s.litellm_api_base, s.litellm_api_key, s.request_timeout
+            s.chat_model,
+            s.embedding_model,
+            s.litellm_api_base,
+            s.litellm_api_key,
+            s.request_timeout,
         )
 
     # TODO: add your own provider here (vLLM, TGI, a company gateway) by implementing
