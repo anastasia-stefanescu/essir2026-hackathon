@@ -14,8 +14,11 @@ from ..config import get_settings
 
 
 class VectorStore:
-    def __init__(self, url: str, collection: str):
-        self.client = QdrantClient(url=url)
+    def __init__(self, url: str, collection: str, local_path: str | None = None):
+        if local_path:
+            self.client = QdrantClient(path=local_path)
+        else:
+            self.client = QdrantClient(url=url)
         self.collection = collection
 
     # --- inspection ---------------------------------------------------------
@@ -67,4 +70,4 @@ class VectorStore:
 @lru_cache
 def get_store() -> VectorStore:
     s = get_settings()
-    return VectorStore(s.qdrant_url, s.qdrant_collection)
+    return VectorStore(s.qdrant_url, s.qdrant_collection, s.qdrant_local_path)

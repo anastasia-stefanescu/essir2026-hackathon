@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     # this to the in-container hostname. The container itself still speaks 6333.
     qdrant_url: str = "http://localhost:6391"
     qdrant_collection: str = "aim_hackathon"
+    qdrant_local_path: str | None = None  # set to e.g. "./data/qdrant" to skip Docker
 
     # --- Retrieval ----------------------------------------------------------
     top_k: int = 5                 # how many results a query retrieves
@@ -49,6 +50,10 @@ class Settings(BaseSettings):
     # app/rag/chunking.py). When you implement real chunking, these are your dials.
     chunk_size: int = 800          # characters per chunk (once you chunk)
     chunk_overlap: int = 150       # characters shared between neighbours
+
+    # --- PDF extraction -----------------------------------------------------
+    # One of: "pypdf", "pymupdf". See app/rag/ingest.py.
+    pdf_reader: str = "pypdf"
 
     # --- Data folders -------------------------------------------------------
     in_dir: str = "data/in"        # put the PDF here; /ingest reads from it

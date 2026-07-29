@@ -11,6 +11,7 @@ from __future__ import annotations
 import uuid
 from pathlib import Path
 
+import fitz  # PyMuPDF
 from pypdf import PdfReader
 from qdrant_client import models
 
@@ -39,15 +40,21 @@ def _find_pdf(filename: str | None) -> Path:
 
 
 def extract_pages(path: Path) -> list[str]:
-    """Per-page text via pypdf.
+    """Per-page text extraction, dispatched by PDF_READER in settings.
 
     TODO(level-1): pypdf is fine for clean digital PDFs and poor on complex layout
       (two columns, tables, ligatures, math). If your citations won't match the
       document, your extractor is usually why. Try pdfplumber, PyMuPDF, Docling,
       GROBID or Marker and keep whichever reads your document best.
     """
-    reader = PdfReader(str(path))
-    return [(page.extract_text() or "") for page in reader.pages]
+    reader = get_settings().pdf_reader.lower()
+    if reader == "pymupdf":
+        doc = fitz.open(str(path))
+
+        return [(page.get_text() or "") for page in doc]
+    if reader == "pypdf":
+        return [(page.extract_text() or "") for page in PdfReader(str(path)).pages]
+    raise ValueError(f"unknown PDF_READER: {reader!r} (expected pypdf or pymupdf)")
 
 
 def ingest(filename: str | None = None, reset: bool = False) -> IngestResponse:
