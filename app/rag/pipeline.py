@@ -19,6 +19,7 @@ from ..llm.base import LLMError, Message
 from ..llm.factory import get_client
 from ..models import Diagnostics, QueryRequest, QueryResponse, Source
 from . import memory
+from .embeddings import get_embedder
 from .retrieve import Context, retrieve
 
 SYSTEM_PROMPT = (
@@ -50,16 +51,22 @@ def _build_messages(
     return messages
 
 
-def _sources_from(contexts: list[Context]) -> list[Source]:
-    # Baseline: the retrieved units become the citations, truncated to a short quote.
+def _sources_from(contexts: list[Context], query_vector: list[float]) -> list[Source]:
     # TODO(level-1): a page (or chunk) is not a precise citation. Return the specific
     #   sentence that supports the answer, with its correct page — not the whole unit.
+    embedder = get_embedder()
     out: list[Source] = []
     for c in contexts:
-        quote = c.text.strip().replace("\n", " ")
-        if len(quote) > 300:
-            quote = quote[:300].rsplit(" ", 1)[0] + "…"
-        out.append(Source(page=c.page, quote=quote, score=round(c.score, 4), title=c.title or None))
+        raw = c.text.replace("\n", " ")
+        parts = [s.strip() for s in raw.split(". ") if s.strip()]
+        sentences = [s if s.endswith(".") else s + "." for s in parts]
+        if not sentences:
+            out.append(Source(page=c.page, quote="", score=round(c.score, 4), title=c.title or None))
+            continue
+        sent_vecs = embedder.embed(sentences, is_query=False)
+        scores = [sum(a * b for a, b in zip(sv, query_vector)) for sv in sent_vecs]
+        best = max(range(len(scores)), key=lambda i: scores[i])
+        out.append(Source(page=c.page, quote=sentences[best], score=round(c.score, 4), title=c.title or None))
     return out
 
 
@@ -86,7 +93,7 @@ def answer(req: QueryRequest) -> QueryResponse:
     now = datetime.now(UTC)
     started = time.perf_counter()
 
-    contexts = retrieve(req.question, top_k, history)
+    contexts, query_vector = retrieve(req.question, top_k, history)
     messages = _build_messages(req.question, contexts, history)
 
     try:
@@ -107,7 +114,7 @@ def answer(req: QueryRequest) -> QueryResponse:
         question=req.question,
         answer=answer_text,
         conversation_id=conversation_id,
-        sources=_sources_from(contexts),
+        sources=_sources_from(contexts, query_vector),
         diagnostics=Diagnostics(
             provider=settings.llm_provider,
             chat_model=settings.chat_model,

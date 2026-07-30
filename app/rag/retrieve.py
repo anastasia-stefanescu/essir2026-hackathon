@@ -33,7 +33,7 @@ def rewrite_query(question: str, history: list[Message]) -> str:
     return question
 
 
-def retrieve(question: str, top_k: int, history: list[Message] | None = None) -> list[Context]:
+def retrieve(question: str, top_k: int, history: list[Message] | None = None) -> tuple[list[Context], list[float]]:
     embedder = get_embedder()
     store = get_store()
 
@@ -47,7 +47,7 @@ def retrieve(question: str, top_k: int, history: list[Message] | None = None) ->
     vector = embedder.embed([query], is_query=True)[0]
     hits = store.search(vector, top_k)
 
-    return [
+    contexts = [
         Context(
             text=str(h.payload.get("text", "")),
             page=int(h.payload.get("page", 0)),
@@ -56,3 +56,4 @@ def retrieve(question: str, top_k: int, history: list[Message] | None = None) ->
         )
         for h in hits
     ]
+    return contexts, vector

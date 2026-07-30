@@ -53,7 +53,8 @@ locally out of the box (sentence-transformers); the LLM works with **LM Studio**
 
 Download ollama: [ollama.com/download/mac](https://ollama.com/download/mac)
 
-Get the model running: 
+Get the model running:
+
 ```bash
 ollama run gemma4:e4b
 ```
