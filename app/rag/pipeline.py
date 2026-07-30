@@ -25,6 +25,7 @@ from .retrieve import Context, retrieve
 SYSTEM_PROMPT = (
     "You answer questions about a single document using only the context provided. "
     "If the context does not contain the answer, say so plainly rather than guessing. "
+    "Avoid copying the context verbatim — instead paraphrase and synthesize from the information you have. "
     "Be specific and concise."
 )
 
@@ -58,8 +59,18 @@ def _sources_from(contexts: list[Context], query_vector: list[float]) -> list[So
     out: list[Source] = []
     for c in contexts:
         raw = c.text.replace("\n", " ")
-        parts = [s.strip() for s in raw.split(". ") if s.strip()]
-        sentences = [s if s.endswith(".") else s + "." for s in parts]
+        parts = raw.split(". ")
+        # Merge back any part that would produce a single-word fragment
+        merged: list[str] = []
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
+            if merged and (len(part.split()) <= 1 or len(merged[-1].split()) <= 1):
+                merged[-1] = merged[-1] + ". " + part
+            else:
+                merged.append(part)
+        sentences = [s if s.endswith(".") else s + "." for s in merged]
         if not sentences:
             out.append(Source(page=c.page, quote="", score=round(c.score, 4), title=c.title or None))
             continue

@@ -8,6 +8,7 @@ sentence-transformers model. Both are yours to improve (see chunking.py and embe
 
 from __future__ import annotations
 
+import re
 import uuid
 from pathlib import Path
 
@@ -19,12 +20,13 @@ from qdrant_client import models
 from ..config import get_settings
 from ..models import IngestResponse
 from ..vectorstore.qdrant_store import get_store
-from .chunking import chunk_pages
+from .chunking import Chunk, chunk_pages
 from .embeddings import get_embedder
 
-import re
-
 _NAMESPACE = uuid.UUID("6f0d9b1e-3b7a-4c2e-9a1d-000000000000")
+
+# Block types to skip entirely when using the Marker JSON renderer
+_SKIP_BLOCK_TYPES = {"PageHeader", "PageFooter", "Picture", "Figure", "FigureGroup", "Diagram"}
 
 
 def _reflow_marker_page(text: str) -> str:
@@ -50,6 +52,78 @@ def _find_pdf(filename: str | None) -> Path:
     return pdfs[0]
 
 
+def _section_breadcrumb(block) -> str:
+    """Build a breadcrumb string from a block's section_hierarchy."""
+    sh = getattr(block, "section_hierarchy", None) or {}
+    if not sh:
+        return ""
+    # section_hierarchy maps depth -> block id; resolve titles via the rendered tree
+    # We can't easily resolve ids here, so we use the block's own html to get the title
+    # Instead we rely on the caller to track this — return empty and let the chunker handle it
+    return ""
+
+
+def _chunks_from_marker_json(path: Path, chunk_size: int, chunk_overlap: int) -> list[Chunk]:
+    """Use Marker's JSON renderer to build chunks with correct page numbers and section titles."""
+    from marker.converters.pdf import PdfConverter
+    from marker.models import create_model_dict
+
+    embed_breadcrumbs = get_settings().embed_breadcrumbs
+
+    converter = PdfConverter(
+        artifact_dict=create_model_dict(),
+        renderer="marker.renderers.json.JSONRenderer",
+    )
+    rendered = converter(str(path))
+
+    # Build a map of block_id -> section header text for breadcrumb resolution
+    header_text: dict[str, str] = {}
+    for page in rendered.children or []:
+        for block in page.children or []:
+            if block.block_type == "SectionHeader":
+                text = re.sub(r"<[^>]+>", "", block.html or "").strip()
+                if text:
+                    header_text[block.id] = text
+
+    def _breadcrumb(block) -> str:
+        sh = getattr(block, "section_hierarchy", None) or {}
+        parts = [header_text[bid] for bid in sh.values() if bid in header_text]
+        return " ".join(f"[{p}]" for p in parts)
+
+    def _sliding(text: str) -> list[str]:
+        if len(text) <= chunk_size:
+            return [text]
+        result = []
+        start = 0
+        while start < len(text):
+            result.append(text[start : start + chunk_size])
+            start += chunk_size - chunk_overlap
+        return result
+
+    chunks: list[Chunk] = []
+    idx = 0
+    for page in rendered.children or []:
+        m = re.search(r"/page/(\d+)/", page.id)
+        page_no = int(m.group(1)) + 1 if m else 0
+
+        for block in page.children or []:
+            if block.block_type in _SKIP_BLOCK_TYPES:
+                continue
+            raw = re.sub(r"<[^>]+>", "", block.html or "").strip()
+            if not raw or len(raw) < 40:
+                continue
+
+            breadcrumb = _breadcrumb(block)
+            title = breadcrumb
+            full_text = f"{breadcrumb} {raw}" if (breadcrumb and embed_breadcrumbs) else raw
+
+            for window in _sliding(full_text):
+                chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
+                idx += 1
+
+    return chunks
+
+
 def extract_pages(path: Path) -> list[str]:
     """Per-page text extraction, dispatched by PDF_READER in settings.
 
@@ -59,7 +133,6 @@ def extract_pages(path: Path) -> list[str]:
       GROBID or Marker and keep whichever reads your document best.
     """
     reader = get_settings().pdf_reader.lower()
-    print("Current reader", reader)
     if reader == "pymupdf":
         doc = fitz.open(str(path))
         return [(page.get_text() or "") for page in doc]
@@ -69,6 +142,8 @@ def extract_pages(path: Path) -> list[str]:
         with pdfplumber.open(str(path)) as pdf:
             return [(page.extract_text() or "") for page in pdf.pages]
     if reader == "marker":
+        # Marker path uses JSON renderer for structured chunking — see _chunks_from_marker_json
+        # This fallback returns raw markdown pages (unused when is_markdown=True)
         from marker.converters.pdf import PdfConverter
         from marker.models import create_model_dict
         from marker.output import text_from_rendered
@@ -76,41 +151,7 @@ def extract_pages(path: Path) -> list[str]:
         converter = PdfConverter(artifact_dict=create_model_dict())
         rendered = converter(str(path))
         text, _, _ = text_from_rendered(rendered)
-
-        # Marker returns one markdown string with no page breaks. Use the TOC
-        # page_id metadata to find where each new page starts in the markdown,
-        # then split on those boundaries.
-        toc = rendered.metadata.get("table_of_contents", []) if rendered.metadata else []
-        # Build a map: page_id -> first heading title on that page (normalised)
-        page_first_heading: dict[int, str] = {}
-        for entry in toc:
-            pid = entry.get("page_id", 0)
-            if pid not in page_first_heading:
-                page_first_heading[pid] = entry["title"].replace("\n", " ").strip()
-
-        if len(page_first_heading) > 1:
-            # Insert \f before the markdown heading that opens each new page
-            import re as _re
-            for pid in sorted(page_first_heading)[1:]:  # skip page 0
-                heading = _re.escape(page_first_heading[pid])
-                # Match the markdown heading line for this title
-                text = _re.sub(
-                    r"(#{1,6}\s+" + heading + r")",
-                    r"\f\1",
-                    text,
-                    count=1,
-                )
-
-        raw_pages = text.split("\f")
-        sorted_page_ids = sorted(page_first_heading) if page_first_heading else list(range(len(raw_pages)))
-        result = []
-        for i, p in enumerate(raw_pages):
-            p = p.strip()
-            if not p:
-                continue
-            real_page = (sorted_page_ids[i] + 1) if i < len(sorted_page_ids) else (i + 1)
-            result.append(f"\x00PAGE{real_page}\x00\n{_reflow_marker_page(p)}")
-        return result
+        return [text]
     raise ValueError(
         f"unknown PDF_READER: {reader!r} (expected pypdf, pymupdf, pdfplumber or marker)"
     )
@@ -122,14 +163,15 @@ def ingest(filename: str | None = None, reset: bool = False) -> IngestResponse:
     store = get_store()
 
     path = _find_pdf(filename)
-    pages = extract_pages(path)
-    chunks = chunk_pages(
-        pages,
-        chunk_size=settings.chunk_size,
-        chunk_overlap=settings.chunk_overlap,
-        is_markdown=(settings.pdf_reader.lower() == "marker"),
-    )
-    print(chunks)
+
+    if settings.pdf_reader.lower() == "marker":
+        chunks = _chunks_from_marker_json(path, settings.chunk_size, settings.chunk_overlap)
+        num_pages = max((c.page for c in chunks), default=0)
+    else:
+        pages = extract_pages(path)
+        chunks = chunk_pages(pages, chunk_size=settings.chunk_size, chunk_overlap=settings.chunk_overlap)
+        num_pages = len(pages)
+
     if not chunks:
         raise ValueError(f"{path.name} produced no text — is it a scanned/image PDF?")
 
@@ -154,7 +196,8 @@ def ingest(filename: str | None = None, reset: bool = False) -> IngestResponse:
 
     return IngestResponse(
         document=path.name,
-        pages=len(pages),
+        pages=num_pages,
         chunks=len(chunks),
         collection=settings.qdrant_collection,
     )
+

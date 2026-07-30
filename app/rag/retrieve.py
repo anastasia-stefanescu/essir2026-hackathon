@@ -38,10 +38,13 @@ def rewrite_query(question: str, history: list[Message]) -> str:
                 "You rewrite follow-up questions into standalone search queries. "
                 "Given the conversation history and a new question, output ONLY the "
                 "rewritten query — a single sentence with no explanation. "
+                "Resolve ambiguous references (e.g. 'that', 'it', 'this') using the "
+                "most recent exchange in the conversation as the context with priority, as "
+                "would happen in a natural conversation. "
                 "If the question is already self-contained, output it unchanged."
             ),
         },
-        *history,
+        *history[-4:],  # last 2 turns — most recent exchange is most relevant for disambiguation
         {
             "role": "user",
             "content": f"Rewrite this as a standalone query: {question}",

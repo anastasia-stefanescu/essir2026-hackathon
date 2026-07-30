@@ -13,8 +13,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-_PAGE_TAG_RE = re.compile(r"^\x00PAGE(\d+)\x00\n?", re.MULTILINE)
-
 
 @dataclass
 class Chunk:
@@ -63,11 +61,6 @@ def _chunk_markdown(pages: list[str], chunk_size: int, chunk_overlap: int) -> li
     # Each page is a string; we tag paragraphs with the page they came from.
     tagged: list[tuple[int, str]] = []  # (page_no, paragraph_text)
     for page_no, page_text in enumerate(pages, start=1):
-        # Extract real page number from tag if present (Marker path)
-        tag_match = _PAGE_TAG_RE.match(page_text)
-        if tag_match:
-            page_no = int(tag_match.group(1))
-            page_text = page_text[tag_match.end():]
         # Separate footnote lines from body (already reflowed by _reflow_marker_page)
         footnotes = dict(
             (m.group(1).lstrip("<sup>").rstrip("</sup>"), m.group(0))  # num -> full line

@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     # app/rag/chunking.py). When you implement real chunking, these are your dials.
     chunk_size: int = 800  # characters per chunk (once you chunk)
     chunk_overlap: int = 150  # characters shared between neighbours
+    embed_breadcrumbs: bool = True  # include section breadcrumb in the embedded text
 
     # --- PDF extraction -----------------------------------------------------
     # One of: "pypdf", "pymupdf", "pdfplumber", "marker". See app/rag/ingest.py.
