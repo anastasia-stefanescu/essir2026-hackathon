@@ -120,6 +120,7 @@ def answer(req: QueryRequest) -> QueryResponse:
             chat_model=settings.chat_model,
             embedding_model=settings.embedding_model,
             retrieved_chunks=len(contexts),
+            rewritten_query=rewritten_question if rewritten_question != req.question else None,
             tokens=None,  # TODO: report real token usage if your provider returns it
             latency_ms=latency_ms,
             timestamp=now.strftime("%Y-%m-%dT%H:%M:%SZ"),

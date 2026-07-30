@@ -53,6 +53,10 @@ class Settings(BaseSettings):
     # One of: "pypdf", "pymupdf", "pdfplumber", "marker". See app/rag/ingest.py.
     pdf_reader: str = "marker"
 
+    # --- Redis (conversation memory) ----------------------------------------
+    # Leave unset to use in-process memory (no persistence, single worker only).
+    redis_url: str | None = None  # e.g. "redis://localhost:6379"
+
     # --- Data folders -------------------------------------------------------
     in_dir: str = "data/in"  # put the PDF here; /ingest reads from it
     out_dir: str = "data/out"  # every /query answer is written here as JSON

@@ -49,6 +49,9 @@ class Diagnostics(BaseModel):
         examples=["intfloat/multilingual-e5-large"],
     )
     retrieved_chunks: int = Field(..., description="how many passages were retrieved", examples=[5])
+    rewritten_query: str | None = Field(
+        None, description="the standalone query used for retrieval (after history rewrite)", examples=["What is the test split size of the SQuAD dataset?"]
+    )
     tokens: int | None = Field(
         None, description="total tokens for this turn, if known", examples=[3200]
     )

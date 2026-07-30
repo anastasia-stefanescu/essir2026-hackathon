@@ -22,6 +22,7 @@ services:
       - QDRANT_URL=http://qdrant:6333
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - LMSTUDIO_BASE_URL=http://host.docker.internal:1234
+      - REDIS_URL=redis://redis:6379
     volumes:
       # Your PDF goes in ./data/in; answers are written to ./data/out; your curated
       # answers live in ./submission. All bind-mounted so they survive rebuilds.
@@ -29,6 +30,8 @@ services:
       - ./submission:/app/submission
     depends_on:
       qdrant:
+        condition: service_started
+      redis:
         condition: service_started
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -41,5 +44,13 @@ services:
     volumes:
       - qdrant_storage:/qdrant/storage
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_storage:/data
+
 volumes:
   qdrant_storage:
+  redis_storage:
