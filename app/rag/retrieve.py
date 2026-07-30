@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..config import get_settings
 from ..llm.base import Message
 from ..vectorstore.qdrant_store import get_store
 from .embeddings import get_embedder
+from .sparse import get_sparse_encoder
 
 
 @dataclass
@@ -36,6 +38,7 @@ def rewrite_query(question: str, history: list[Message]) -> str:
 def retrieve(question: str, top_k: int, history: list[Message] | None = None) -> list[Context]:
     embedder = get_embedder()
     store = get_store()
+    settings = get_settings()
 
     query = rewrite_query(question, history or [])
 
@@ -45,7 +48,12 @@ def retrieve(question: str, top_k: int, history: list[Message] | None = None) ->
     #   (retrieve -> reason -> retrieve again), or a second index (e.g. a graph or a
     #   per-section summary index) alongside this one.
     vector = embedder.embed([query], is_query=True)[0]
-    hits = store.search(vector, top_k)
+
+    sparse_vec: dict[int, float] | None = None
+    if settings.search_mode != "dense":
+        sparse_vec = get_sparse_encoder().encode([query])[0]
+
+    hits = store.search(vector, top_k, sparse_vector=sparse_vec, mode=settings.search_mode)
 
     return [
         Context(

@@ -21,6 +21,7 @@ from ..models import IngestResponse
 from ..vectorstore.qdrant_store import get_store
 from .chunking import chunk_pages
 from .embeddings import get_embedder
+from .sparse import get_sparse_encoder
 
 import re
 
@@ -109,15 +110,26 @@ def ingest(filename: str | None = None, reset: bool = False) -> IngestResponse:
         texts = [c.text for c in chunks[i : i + batch]]
         vectors.extend(embedder.embed(texts, is_query=False))
 
-    store.ensure_collection(dim=len(vectors[0]), reset=reset)
+    store.ensure_collection(dim=len(vectors[0]), reset=reset, sparse=settings.search_mode != "dense")
+
+    sparse_vecs: list[dict[int, float]] | None = None
+    if settings.search_mode != "dense":
+        sparse_vecs = get_sparse_encoder().encode([c.text for c in chunks])
 
     points = [
         models.PointStruct(
             id=str(uuid.uuid5(_NAMESPACE, f"{path.name}:{c.index}")),
-            vector=vec,
+            vector=(
+                {"dense": vec, "sparse": models.SparseVector(
+                    indices=list(sparse_vecs[i].keys()),
+                    values=list(sparse_vecs[i].values()),
+                )}
+                if sparse_vecs is not None
+                else vec
+            ),
             payload={"text": c.text, "page": c.page, "source": path.name, "title": c.title},
         )
-        for c, vec in zip(chunks, vectors)
+        for i, (c, vec) in enumerate(zip(chunks, vectors))
     ]
     store.upsert(points)
 
