@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..llm.base import Message
+from ..llm.base import LLMError, Message
+from ..llm.factory import get_client
 from ..vectorstore.qdrant_store import get_store
 from .embeddings import get_embedder
 
@@ -29,11 +30,30 @@ def rewrite_query(question: str, history: list[Message]) -> str:
     """
     if not history:
         return question
-    # Baseline: ignores history. Replace this.
-    return question
+    client = get_client()
+    messages: list[Message] = [
+        {
+            "role": "system",
+            "content": (
+                "You rewrite follow-up questions into standalone search queries. "
+                "Given the conversation history and a new question, output ONLY the "
+                "rewritten query — a single sentence with no explanation. "
+                "If the question is already self-contained, output it unchanged."
+            ),
+        },
+        *history,
+        {
+            "role": "user",
+            "content": f"Rewrite this as a standalone query: {question}",
+        },
+    ]
+    try:
+        return client.chat(messages).strip()
+    except LLMError:
+        return question
 
 
-def retrieve(question: str, top_k: int, history: list[Message] | None = None) -> tuple[list[Context], list[float]]:
+def retrieve(question: str, top_k: int, history: list[Message] | None = None) -> tuple[list[Context], list[float], str]:
     embedder = get_embedder()
     store = get_store()
 
@@ -56,4 +76,4 @@ def retrieve(question: str, top_k: int, history: list[Message] | None = None) ->
         )
         for h in hits
     ]
-    return contexts, vector
+    return contexts, vector, query

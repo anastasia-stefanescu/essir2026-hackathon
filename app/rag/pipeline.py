@@ -93,7 +93,7 @@ def answer(req: QueryRequest) -> QueryResponse:
     now = datetime.now(UTC)
     started = time.perf_counter()
 
-    contexts, query_vector = retrieve(req.question, top_k, history)
+    contexts, query_vector, rewritten_question = retrieve(req.question, top_k, history)
     messages = _build_messages(req.question, contexts, history)
 
     try:
@@ -105,7 +105,7 @@ def answer(req: QueryRequest) -> QueryResponse:
             f"[LLM unavailable: {e}] Retrieved context is attached as sources; no generated answer."
         )
 
-    memory.append(conversation_id, req.question, answer_text)
+    memory.append(conversation_id, rewritten_question, answer_text)
     latency_ms = int((time.perf_counter() - started) * 1000)
 
     response = QueryResponse(
