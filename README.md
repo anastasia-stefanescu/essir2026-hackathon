@@ -53,7 +53,10 @@ locally out of the box (sentence-transformers); the LLM works with **LM Studio**
 
 Download ollama: [ollama.com/download/mac](https://ollama.com/download/mac)
 
-Get the model running: **ollama run gemma4:e4b**
+Get the model running: 
+```bash
+ollama run gemma4:e4b
+```
 
 ```bash
 # 1. Fork on GitHub, then clone your fork
@@ -67,11 +70,6 @@ cp .env.example .env
 cp ~/Downloads/your-document.pdf data/in/
 
 # 4. Bring up the app + Qdrant  (unusual ports on purpose)
-docker compose up --build
-#    app     -> http://localhost:8791      (Swagger UI at /docs)
-#    qdrant  -> http://localhost:6391      (dashboard at /dashboard)
-
-# Prefer to run it without docker?
 uv sync
 uv run uvicorn app.main:app --port 8791 --reload    # needs a reachable Qdrant + LLM
 
@@ -81,11 +79,12 @@ curl -s localhost:8791/query  -H 'content-type: application/json' \
   -d '{"question": "What is this document about?", "level": 1}'
 ```
 
-Prefer to run it without Docker?
+Prefer to run it with Docker?
 
 ```bash
-uv sync
-uv run uvicorn app.main:app --port 8791 --reload    # needs a reachable Qdrant + LLM
+docker compose up --build
+#    app     -> http://localhost:8791      (Swagger UI at /docs)
+#    qdrant  -> http://localhost:6391      (dashboard at /dashboard)
 ```
 
 ## Where things are
