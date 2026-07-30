@@ -76,10 +76,41 @@ def extract_pages(path: Path) -> list[str]:
         converter = PdfConverter(artifact_dict=create_model_dict())
         rendered = converter(str(path))
         text, _, _ = text_from_rendered(rendered)
-        # marker returns one markdown string; split on page-break markers
+
+        # Marker returns one markdown string with no page breaks. Use the TOC
+        # page_id metadata to find where each new page starts in the markdown,
+        # then split on those boundaries.
+        toc = rendered.metadata.get("table_of_contents", []) if rendered.metadata else []
+        # Build a map: page_id -> first heading title on that page (normalised)
+        page_first_heading: dict[int, str] = {}
+        for entry in toc:
+            pid = entry.get("page_id", 0)
+            if pid not in page_first_heading:
+                page_first_heading[pid] = entry["title"].replace("\n", " ").strip()
+
+        if len(page_first_heading) > 1:
+            # Insert \f before the markdown heading that opens each new page
+            import re as _re
+            for pid in sorted(page_first_heading)[1:]:  # skip page 0
+                heading = _re.escape(page_first_heading[pid])
+                # Match the markdown heading line for this title
+                text = _re.sub(
+                    r"(#{1,6}\s+" + heading + r")",
+                    r"\f\1",
+                    text,
+                    count=1,
+                )
+
         raw_pages = text.split("\f")
-        pages = [p.strip() for p in raw_pages] if len(raw_pages) > 1 else [text]
-        return [_reflow_marker_page(p) for p in pages]
+        sorted_page_ids = sorted(page_first_heading) if page_first_heading else list(range(len(raw_pages)))
+        result = []
+        for i, p in enumerate(raw_pages):
+            p = p.strip()
+            if not p:
+                continue
+            real_page = (sorted_page_ids[i] + 1) if i < len(sorted_page_ids) else (i + 1)
+            result.append(f"\x00PAGE{real_page}\x00\n{_reflow_marker_page(p)}")
+        return result
     raise ValueError(
         f"unknown PDF_READER: {reader!r} (expected pypdf, pymupdf, pdfplumber or marker)"
     )

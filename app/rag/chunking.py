@@ -13,6 +13,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+_PAGE_TAG_RE = re.compile(r"^\x00PAGE(\d+)\x00\n?", re.MULTILINE)
+
 
 @dataclass
 class Chunk:
@@ -24,12 +26,17 @@ class Chunk:
 
 # Matches any markdown heading line: #, ##, ###, etc.
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
+# Extracts a section number prefix like "3.2.1" from a heading title
+_SECTION_NUM_RE = re.compile(r"^(\d+(?:\.\d+)*)\.")
 # Matches a footnote line moved to end of page by _reflow_marker_page: <sup>N</sup>...
 _FOOTNOTE_LINE_RE = re.compile(r"^(<sup>\d+<\/sup>.+)$", re.MULTILINE)
 # Matches an inline footnote reference inside paragraph body: <sup>N</sup>
 _FOOTNOTE_REF_RE = re.compile(r"<sup>(\d+)<\/sup>")
+# Matches a paragraph that is only an image reference
+_IMAGE_ONLY_RE = re.compile(r"^!\[.*?\]\(.*?\)\.?$", re.DOTALL)
 # Matches an inline label at the start of a paragraph, e.g. "Objective:", "Methods:"
 _INLINE_LABEL_RE = re.compile(r"^([A-Z][A-Za-z /\-]{0,40}):")
+_MIN_CONTENT_LEN = 40  # discard chunks shorter than this
 
 
 def _sliding_window(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
@@ -56,6 +63,11 @@ def _chunk_markdown(pages: list[str], chunk_size: int, chunk_overlap: int) -> li
     # Each page is a string; we tag paragraphs with the page they came from.
     tagged: list[tuple[int, str]] = []  # (page_no, paragraph_text)
     for page_no, page_text in enumerate(pages, start=1):
+        # Extract real page number from tag if present (Marker path)
+        tag_match = _PAGE_TAG_RE.match(page_text)
+        if tag_match:
+            page_no = int(tag_match.group(1))
+            page_text = page_text[tag_match.end():]
         # Separate footnote lines from body (already reflowed by _reflow_marker_page)
         footnotes = dict(
             (m.group(1).lstrip("<sup>").rstrip("</sup>"), m.group(0))  # num -> full line
@@ -64,7 +76,7 @@ def _chunk_markdown(pages: list[str], chunk_size: int, chunk_overlap: int) -> li
         body = _FOOTNOTE_LINE_RE.sub("", page_text)
         for para in body.split("\n\n"):
             para = para.strip()
-            if para:
+            if para and not _IMAGE_ONLY_RE.match(para):
                 tagged.append((page_no, para, footnotes))  # type: ignore[arg-type]
 
     # Walk tagged paragraphs, maintaining a heading breadcrumb stack.
@@ -75,13 +87,14 @@ def _chunk_markdown(pages: list[str], chunk_size: int, chunk_overlap: int) -> li
     for page_no, para, footnotes in tagged:  # type: ignore[misc]
         heading_match = _HEADING_RE.match(para)
         if heading_match:
-            level = len(heading_match.group(1))
             title = heading_match.group(2).strip()
+            num_match = _SECTION_NUM_RE.match(title)
+            if num_match:
+                level = num_match.group(1).count(".") + 1
+            else:
+                level = len(heading_match.group(1))
             breadcrumb_stack = [(l, t) for l, t in breadcrumb_stack if l < level]
             breadcrumb_stack.append((level, title))
-            breadcrumb = " ".join(f"[{t}]" for _, t in breadcrumb_stack)
-            chunks.append(Chunk(text=breadcrumb, page=page_no, index=idx, title=breadcrumb))
-            idx += 1
             continue
 
         breadcrumb = " ".join(f"[{t}]" for _, t in breadcrumb_stack)
@@ -90,6 +103,11 @@ def _chunk_markdown(pages: list[str], chunk_size: int, chunk_overlap: int) -> li
         body = para
         if matched_footnotes:
             body = para + "\n\n" + "\n".join(matched_footnotes)
+
+        # Drop paragraphs whose content (excluding images) is too short to be useful
+        content_only = re.sub(r"!\[.*?\]\(.*?\)", "", body).strip()
+        if len(content_only) < _MIN_CONTENT_LEN:
+            continue
 
         inline_label = _INLINE_LABEL_RE.match(para)
         title = f"{breadcrumb} [{inline_label.group(1)}]" if inline_label else breadcrumb
