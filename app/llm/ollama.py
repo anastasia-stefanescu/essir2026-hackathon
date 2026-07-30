@@ -35,16 +35,13 @@ class OllamaClient:
     def embed(self, texts: list[str]) -> list[list[float]]:
         # /api/embeddings takes ONE prompt per call, so we loop. Newer Ollama has a
         # batched /api/embed endpoint — TODO(level-1): switch to it to speed up ingest.
-        out: list[list[float]] = []
         try:
-            for text in texts:
-                resp = httpx.post(
-                    f"{self.base_url}/api/embeddings",
-                    json={"model": self.embedding_model, "prompt": text},
-                    timeout=self.timeout,
-                )
-                resp.raise_for_status()
-                out.append(resp.json()["embedding"])
-            return out
+            resp = httpx.post(
+                f"{self.base_url}/api/embed",
+                json={"model": self.embedding_model, "input": texts},
+                timeout=self.timeout,
+            )
+            resp.raise_for_status()
+            return resp.json()["embeddings"]
         except Exception as e:
             raise LLMError(f"ollama embed failed: {e}") from e
