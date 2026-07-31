@@ -22,6 +22,7 @@ from ..models import IngestResponse
 from ..vectorstore.qdrant_store import get_store
 from .chunking import Chunk, chunk_pages
 from .embeddings import get_embedder
+from .sparse import get_sparse_encoder
 
 _NAMESPACE = uuid.UUID("6f0d9b1e-3b7a-4c2e-9a1d-000000000000")
 
@@ -146,10 +147,9 @@ def _chunks_from_marker_json(path: Path, chunk_size: int, chunk_overlap: int) ->
                     page_chunks[-1].text = page_chunks[-1].text + "\n" + raw
                 elif len(raw) >= 40:
                     breadcrumb = _breadcrumb(block)
-                    title = breadcrumb
                     full_text = f"{breadcrumb} {raw}" if (breadcrumb and embed_breadcrumbs) else raw
                     for window in _sliding(full_text):
-                        page_chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
+                        page_chunks.append(Chunk(text=window, page=page_no, index=idx))
                         idx += 1
                 continue
 
@@ -157,11 +157,10 @@ def _chunks_from_marker_json(path: Path, chunk_size: int, chunk_overlap: int) ->
                 continue
 
             breadcrumb = _breadcrumb(block)
-            title = breadcrumb
             full_text = f"{breadcrumb} {raw}" if (breadcrumb and embed_breadcrumbs) else raw
 
             for window in _sliding(full_text):
-                page_chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
+                page_chunks.append(Chunk(text=window, page=page_no, index=idx))
                 idx += 1
 
         # Append footnotes to the last body chunk on this page
@@ -232,15 +231,26 @@ def ingest(filename: str | None = None, reset: bool = False) -> IngestResponse:
         texts = [c.text for c in chunks[i : i + batch]]
         vectors.extend(embedder.embed(texts, is_query=False))
 
-    store.ensure_collection(dim=len(vectors[0]), reset=reset)
+    store.ensure_collection(dim=len(vectors[0]), reset=reset, sparse=settings.search_mode != "dense")
+
+    sparse_vecs: list[dict[int, float]] | None = None
+    if settings.search_mode != "dense":
+        sparse_vecs = get_sparse_encoder().encode([c.text for c in chunks])
 
     points = [
         models.PointStruct(
             id=str(uuid.uuid5(_NAMESPACE, f"{path.name}:{c.index}")),
-            vector=vec,
-            payload={"text": c.text, "page": c.page, "source": path.name, "title": c.title},
+            vector=(
+                {"dense": vec, "sparse": models.SparseVector(
+                    indices=list(sparse_vecs[i].keys()),
+                    values=list(sparse_vecs[i].values()),
+                )}
+                if sparse_vecs is not None
+                else vec
+            ),
+            payload={"text": c.text, "page": c.page, "source": path.name},
         )
-        for c, vec in zip(chunks, vectors)
+        for i, (c, vec) in enumerate(zip(chunks, vectors))
     ]
     store.upsert(points)
 

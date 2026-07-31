@@ -1,1 +1,44 @@
-{}
+{
+  "question_id": "q781e09",
+  "level": 2,
+  "question": "What was a difficulty that the authors encountered?  ",
+  "answer": "The authors encountered several difficulties, including:\n\n1.  **Detecting Criteria in Larger Texts:** For some inclusion criteria, it was challenging to detect or explain them by modeling larger sections of text, making sentence-level annotation necessary.\n2.  **Data Sparsity and Evaluation Limitation:** The articles that reported generating SARS-CoV-2 sequences were relatively sparse. This sparsity led to a primary limitation: the evaluation of classifiers for detecting patient metadata was based only on manually validated true positive articles from the first classifier, meaning it did not reflect how the downstream classifiers would perform in a fully automated pipeline.\n3.  **Evaluation Feasibility:** Because over 99% of annotated sentences in the keyword-matched articles did not provide evidence of generating SARS-CoV-2 sequences, manually evaluating recall was deemed infeasible.",
+  "conversation_id": "level-2",
+  "sources": [
+    {
+      "page": 4,
+      "quote": "Sentence-level annotation allowed us to emphasize inclusion criteria that may not be the article's primary focus and, thus, may be challenging to detect or explain by modeling larger units of text.",
+      "score": 0.7776
+    },
+    {
+      "page": 6,
+      "quote": "Guidelines were developed to help annotators—two of the authors (AZK and KO) and an undergraduate student studying biomedical informatics (NK)—identify sentences that reported patient metadata associated with the SARS-CoV-2 sequences, including age, sex, race/ethnicity, symptoms, disease severity, viral load, duration of infection, lab results, vital signs, treatments, hospitalization, outcomes, comorbidities, risk factors, vaccination status, place of residence, geographic location of sample collection, a.",
+      "score": 0.7646
+    },
+    {
+      "page": 5,
+      "quote": "While keyword filters were necessary initially to curate a set of articles for manual annotation, an evaluation of the classifier's performance based on the keyword-matched test set would not necessarily reflect its performance in general.",
+      "score": 0.7591
+    },
+    {
+      "page": 5,
+      "quote": "annotated sentences in the keyword-matched articles did not provide evidence of generating SARS-CoV-2 sequences, it would not have been feasible to evaluate recall by manually.",
+      "score": 0.7589
+    },
+    {
+      "page": 16,
+      "quote": "Because articles that reported generating SARS-CoV-2 sequences were relatively sparse, we decided to prioritize high recall—a trade-off that increased the number of false positive articles.",
+      "score": 0.7581
+    }
+  ],
+  "diagnostics": {
+    "provider": "ollama",
+    "chat_model": "gemma4:e4b",
+    "embedding_model": "intfloat/multilingual-e5-large",
+    "retrieved_chunks": 5,
+    "rewritten_query": null,
+    "tokens": null,
+    "latency_ms": 18455,
+    "timestamp": "2026-07-31T07:44:17Z"
+  }
+}

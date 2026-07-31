@@ -35,7 +35,7 @@ def _build_messages(
 ) -> list[Message]:
     context_block = (
         "\n\n".join(
-            f"[page {c.page}]{f' [{c.title}]' if c.title else ''} {c.text}" for c in contexts
+            f"[page {c.page}] {c.text}" for c in contexts
         )
         or "(no context retrieved)"
     )
@@ -72,12 +72,12 @@ def _sources_from(contexts: list[Context], query_vector: list[float]) -> list[So
                 merged.append(part)
         sentences = [s if s.endswith(".") else s + "." for s in merged]
         if not sentences:
-            out.append(Source(page=c.page, quote="", score=round(c.score, 4), title=c.title or None))
+            out.append(Source(page=c.page, quote="", score=round(c.score, 4)))
             continue
         sent_vecs = embedder.embed(sentences, is_query=False)
         scores = [sum(a * b for a, b in zip(sv, query_vector)) for sv in sent_vecs]
         best = max(range(len(scores)), key=lambda i: scores[i])
-        out.append(Source(page=c.page, quote=sentences[best], score=round(c.score, 4), title=c.title or None))
+        out.append(Source(page=c.page, quote=sentences[best], score=round(c.score, 4)))
     return out
 
 

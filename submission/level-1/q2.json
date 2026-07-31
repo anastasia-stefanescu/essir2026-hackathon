@@ -1,1 +1,44 @@
-{}
+{
+  "question_id": "q1dce97",
+  "level": 1,
+  "question": "What classifier models were used? ",
+  "answer": "The following classifier models were utilized in the project's evaluations:\n\n*   **BERT-based classifiers:** These were used generally, including a specific instance of fine-tuning the **BERT-Base-Uncased** model.\n*   **SVM (Support Vector Machine) classifier**.\n*   **BiomedBERT-Base-Abstract-Fulltext**: A smaller model pre-trained on PubMed abstracts and PubMed Central full-text articles.\n*   **COVID-Twitter-BERT**: A model that was pre-trained specifically on Twitter posts related to COVID-19.",
+  "conversation_id": "level-1",
+  "sources": [
+    {
+      "page": 5,
+      "quote": "To address the class imbalance, we performed an additional experiment with the BERT-based classifier in which we under-sampled the \"negative\" (i.e., majority) class in the training set by removing sentences that were not similar to any of the sentences in the \"positive\" (i.e., the minority) class.",
+      "score": 0.7
+    },
+    {
+      "page": 4,
+      "quote": "Although the classifiers were trained at the sentence level, we were primarily interested in evaluating their performance at the article level because our downstream task was to search for patient metadata within entire articles that reported generating SARS-CoV-2 sequences.",
+      "score": 0.5
+    },
+    {
+      "page": 8,
+      "quote": "Based on the 49 keyword-matched articles (10,016 sentences) in the heldout test set, the SVM [13] classifier achieved an F1-score of 0.370 (precision = 0.329 and recall = 0.422) and the BERT-based [15] classifier achieved an F1 score of 0.480 (precision = 0.492 and recall = 0.469) for detecting sentences that provided evidence of generating SARS-CoV-2 sequences.",
+      "score": 0.3333
+    },
+    {
+      "page": 11,
+      "quote": "We performed additional experiments for these latter three classifiers to address the class imbalance [12]; however, while under-sampling combined with class weights improved recall for all three classifiers, the F1-score did not improve (Table 3).",
+      "score": 0.3333
+    },
+    {
+      "page": 5,
+      "quote": "We evaluated precision by manually annotating true and false positives among the sentences that the classifier predicted as providing evidence that the study had generated SARS-CoV-2 sequences.",
+      "score": 0.25
+    }
+  ],
+  "diagnostics": {
+    "provider": "ollama",
+    "chat_model": "gemma4:e4b",
+    "embedding_model": "intfloat/multilingual-e5-large",
+    "retrieved_chunks": 5,
+    "rewritten_query": "What classifier models were used in the experiments?",
+    "tokens": null,
+    "latency_ms": 15227,
+    "timestamp": "2026-07-31T08:26:48Z"
+  }
+}

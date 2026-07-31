@@ -1,7 +1,8 @@
 {
   "team_name": "",
   "members": [
-    { "name": "", "email": "" }
+    { "name": "Anastasia Stefanescu", "email": "anastasia.stefanescu@sap.com" },
+    { "name": "David Constantin Berbece", "email": "david.constantin.berbece@sap.com"}
   ],
-  "repo_url": ""
+  "repo_url": "https://github.com/anastasia-stefanescu/essir2026-hackathon"
 }

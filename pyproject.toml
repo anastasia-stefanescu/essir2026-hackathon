@@ -24,6 +24,10 @@ dependencies = [
     "litellm>=1.44",
     "python-multipart>=0.0.9",
     "redis>=5.0",
+    # Sparse embeddings for hybrid search (search_mode=sparse/hybrid).
+    # fastembed: lightweight SPLADE-based sparse encoder (no GPU needed).
+    # splade/tfidf backends use transformers/sklearn already pulled transitively.
+    "fastembed>=0.4",
 ]
 
 # `uv sync` installs these too; `uv sync --no-dev` skips them (used in the Docker image).

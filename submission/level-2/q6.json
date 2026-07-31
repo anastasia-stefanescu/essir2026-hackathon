@@ -1,1 +1,44 @@
-{}
+{
+  "question_id": "q61c8d2",
+  "level": 2,
+  "question": "How did they try to resolve that?  ",
+  "answer": "Based on the provided text, the authors took several methodological steps to increase the reliability of their analysis and handle potential difficulties:\n\n*   **Enhanced Annotation Depth:** To manage criteria that might be difficult to detect when analyzing large blocks of text, they utilized **sentence-level annotation**.\n*   **Establishing Consensus (Inter-Annotator Agreement):** For data preparation, they developed specific guidelines for annotators. They ensured the reliability of their annotations by having articles independently annotated by multiple personnel and reporting high levels of agreement (e.g., an F1 score of 1.0 for identifying articles that reported generating SARS-CoV-2 sequences).\n*   **Structured Evaluation:** For testing, they split the total data into three sets—training, validation, and held-out test data. Crucially, even though the classifiers were trained at the sentence level, they ensured the evaluation was conducted **at the article level**, which matched their primary interest: searching for patient metadata within entire articles.",
+  "conversation_id": "level-2",
+  "sources": [
+    {
+      "page": 16,
+      "quote": "Because articles that reported generating SARS-CoV-2 sequences were relatively sparse, we decided to prioritize high recall—a trade-off that increased the number of false positive articles.",
+      "score": 0.8884
+    },
+    {
+      "page": 4,
+      "quote": "Guidelines were developed to help annotators—four undergraduate students studying biomedical informatics (NK, ELW, HS, and PS)—determine whether the articles reported generating SARS-CoV-2 sequences—in particular, generating original sequences for the present study, as opposed to using sequ.",
+      "score": 0.8833
+    },
+    {
+      "page": 6,
+      "quote": "We manually validated the articles in LitCovid [9] for which the deployed classifier predicted the presence of sentences that provided evidence of generating SARS-CoV-2 sequences, and randomly sampled 150 of them for further manual annotation using the INCEpTION platform [11] (Figure 1).",
+      "score": 0.8747
+    },
+    {
+      "page": 4,
+      "quote": "her the articles reported generating SARS-CoV-2 sequences—in particular, generating original sequences for the present study, as opposed to using sequences generated in a prior study—and identify specific sentences that provided evidence of such.",
+      "score": 0.8729
+    },
+    {
+      "page": 4,
+      "quote": "Although the classifiers were trained at the sentence level, we were primarily interested in evaluating their performance at the article level because our downstream task was to search for patient metadata within entire articles that reported generating SARS-CoV-2 sequences.",
+      "score": 0.8725
+    }
+  ],
+  "diagnostics": {
+    "provider": "ollama",
+    "chat_model": "gemma4:e4b",
+    "embedding_model": "intfloat/multilingual-e5-large",
+    "retrieved_chunks": 5,
+    "rewritten_query": "How did the authors address the evaluation limitation caused by data sparsity in SARS-CoV-2 sequence generation articles?",
+    "tokens": null,
+    "latency_ms": 27376,
+    "timestamp": "2026-07-31T07:50:18Z"
+  }
+}
