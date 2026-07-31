@@ -1,0 +1,9 @@
+﻿uv : error: Failed to query Python interpreter at 
+`C:\Users\I775946\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\python.exe`
+At line:1 char:44
++ cd 'C:\Users\I775946\essir2026-hackathon'; uv sync 2>&1 | Out-File -F ...
++                                            ~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (error: Failed t...one\python.exe`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Caused by: Access is denied. (os error 5)
