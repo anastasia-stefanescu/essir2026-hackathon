@@ -44,7 +44,7 @@ def rewrite_query(question: str, history: list[Message]) -> str:
                 "If the question is already self-contained, output it unchanged."
             ),
         },
-        *history[-4:],  # last 2 turns — most recent exchange is most relevant for disambiguation
+        *history,  # full history; most recent exchange has priority for disambiguation
         {
             "role": "user",
             "content": f"Rewrite this as a standalone query: {question}",

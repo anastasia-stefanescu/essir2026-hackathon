@@ -27,6 +27,9 @@ _NAMESPACE = uuid.UUID("6f0d9b1e-3b7a-4c2e-9a1d-000000000000")
 
 # Block types to skip entirely when using the Marker JSON renderer
 _SKIP_BLOCK_TYPES = {"PageHeader", "PageFooter", "Picture", "Figure", "FigureGroup", "Diagram"}
+# Block types that attach to the preceding body chunk (tables inline) or last chunk (captions)
+_ATTACH_INLINE_TYPES = {"Table"}
+_ATTACH_LAST_TYPES = {"Caption", "TableOfContents"}
 
 
 def _reflow_marker_page(text: str) -> str:
@@ -37,6 +40,15 @@ def _reflow_marker_page(text: str) -> str:
         return text
     body = footnote_pattern.sub("", text).strip()
     return body + "\n\n" + "\n".join(footnotes)
+
+
+def _strip_html(html: str, preserve_table_spacing: bool = False) -> str:
+    if preserve_table_spacing:
+        html = re.sub(r"</t[dh]>", " ", html)
+        html = re.sub(r"</tr>", "\n", html)
+    text = re.sub(r"<[^>]+>", "", html)
+    text = text.replace("\x02", "").replace("\xad", "")  # soft hyphens
+    return text.strip()
 
 
 def _find_pdf(filename: str | None) -> Path:
@@ -81,7 +93,7 @@ def _chunks_from_marker_json(path: Path, chunk_size: int, chunk_overlap: int) ->
     for page in rendered.children or []:
         for block in page.children or []:
             if block.block_type == "SectionHeader":
-                text = re.sub(r"<[^>]+>", "", block.html or "").strip()
+                text = _strip_html(block.html or "")
                 if text:
                     header_text[block.id] = text
 
@@ -106,11 +118,42 @@ def _chunks_from_marker_json(path: Path, chunk_size: int, chunk_overlap: int) ->
         m = re.search(r"/page/(\d+)/", page.id)
         page_no = int(m.group(1)) + 1 if m else 0
 
+        # Collect footnotes and separate body blocks
+        footnotes: list[str] = []
+        body_blocks = []
         for block in page.children or []:
             if block.block_type in _SKIP_BLOCK_TYPES:
                 continue
-            raw = re.sub(r"<[^>]+>", "", block.html or "").strip()
-            if not raw or len(raw) < 40:
+            if block.block_type == "Footnote":
+                fn_text = _strip_html(block.html or "")
+                if fn_text:
+                    footnotes.append(fn_text)
+            else:
+                body_blocks.append(block)
+
+        page_chunks: list[Chunk] = []
+        for block in body_blocks:
+            raw_html = block.html or ""
+            is_table = block.block_type in _ATTACH_INLINE_TYPES
+            is_caption = block.block_type in _ATTACH_LAST_TYPES
+            raw = _strip_html(raw_html, preserve_table_spacing=is_table)
+            if not raw:
+                continue
+
+            # Tables attach to the preceding body chunk; captions to the last chunk
+            if is_table or is_caption:
+                if page_chunks:
+                    page_chunks[-1].text = page_chunks[-1].text + "\n" + raw
+                elif len(raw) >= 40:
+                    breadcrumb = _breadcrumb(block)
+                    title = breadcrumb
+                    full_text = f"{breadcrumb} {raw}" if (breadcrumb and embed_breadcrumbs) else raw
+                    for window in _sliding(full_text):
+                        page_chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
+                        idx += 1
+                continue
+
+            if len(raw) < 40:
                 continue
 
             breadcrumb = _breadcrumb(block)
@@ -118,8 +161,14 @@ def _chunks_from_marker_json(path: Path, chunk_size: int, chunk_overlap: int) ->
             full_text = f"{breadcrumb} {raw}" if (breadcrumb and embed_breadcrumbs) else raw
 
             for window in _sliding(full_text):
-                chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
+                page_chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
                 idx += 1
+
+        # Append footnotes to the last body chunk on this page
+        if footnotes and page_chunks:
+            page_chunks[-1].text = page_chunks[-1].text + "\n" + " ".join(footnotes)
+
+        chunks.extend(page_chunks)
 
     return chunks
 
@@ -166,6 +215,7 @@ def ingest(filename: str | None = None, reset: bool = False) -> IngestResponse:
 
     if settings.pdf_reader.lower() == "marker":
         chunks = _chunks_from_marker_json(path, settings.chunk_size, settings.chunk_overlap)
+        print(chunks)
         num_pages = max((c.page for c in chunks), default=0)
     else:
         pages = extract_pages(path)
