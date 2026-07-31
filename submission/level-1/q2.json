@@ -1,33 +1,33 @@
 {
-  "question_id": "q1dce97",
+  "question_id": "q45da26",
   "level": 1,
   "question": "What classifier models were used? ",
-  "answer": "The following classifier models were utilized in the project's evaluations:\n\n*   **BERT-based classifiers:** These were used generally, including a specific instance of fine-tuning the **BERT-Base-Uncased** model.\n*   **SVM (Support Vector Machine) classifier**.\n*   **BiomedBERT-Base-Abstract-Fulltext**: A smaller model pre-trained on PubMed abstracts and PubMed Central full-text articles.\n*   **COVID-Twitter-BERT**: A model that was pre-trained specifically on Twitter posts related to COVID-19.",
+  "answer": "The context details several types of classifiers, ranging from traditional machine learning models to multiple versions of BERT-based deep neural networks:\n\n**1. Traditional Classifiers:**\n*   **Support Vector Machine (SVM):** Used in both general forms and through the LibSVM implementation.\n\n**2. Deep Neural Network / Transformer Models (BERT Family):**\nThese were fine-tuned using different pre-trained corpora, categorized by domain:\n\n*   **General Domains:**\n    *   DistilBERT-Base\n    *   BERT-Base\n    *   RoBERTa-Large\n*   **Biomedical Domains:**\n    *   BioBERT\n    *   BiomedBERT-Large-Abstract\n    *   BiomedBERT-Base-Abstract-Fulltext\n*   **COVID-19 Specific Domains:**\n    *   COVID-SciBERT\n    *   COVID-Twitter-BERT\n\nAdditionally, specific variants like **BERT-Base-Uncased** were mentioned for fine-tuning.",
   "conversation_id": "level-1",
   "sources": [
     {
-      "page": 5,
-      "quote": "To address the class imbalance, we performed an additional experiment with the BERT-based classifier in which we under-sampled the \"negative\" (i.e., majority) class in the training set by removing sentences that were not similar to any of the sentences in the \"positive\" (i.e., the minority) class.",
-      "score": 0.7
-    },
-    {
-      "page": 4,
-      "quote": "Although the classifiers were trained at the sentence level, we were primarily interested in evaluating their performance at the article level because our downstream task was to search for patient metadata within entire articles that reported generating SARS-CoV-2 sequences.",
+      "page": 8,
+      "quote": "Based on the 49 keyword-matched articles (10,016 sentences) in the heldout test set, the SVM [13] classifier achieved an F1-score of 0.370 (precision = 0.329 and recall = 0.422) and the BERT-based [15] classifier achieved an F1 score of 0.480 (precision = 0.492 and recall = 0.469) for detecting sentences that provided evidence of generating SARS-CoV-2 sequences.",
       "score": 0.5
     },
     {
-      "page": 8,
-      "quote": "Based on the 49 keyword-matched articles (10,016 sentences) in the heldout test set, the SVM [13] classifier achieved an F1-score of 0.370 (precision = 0.329 and recall = 0.422) and the BERT-based [15] classifier achieved an F1 score of 0.480 (precision = 0.492 and recall = 0.469) for detecting sentences that provided evidence of generating SARS-CoV-2 sequences.",
-      "score": 0.3333
-    },
-    {
-      "page": 11,
-      "quote": "We performed additional experiments for these latter three classifiers to address the class imbalance [12]; however, while under-sampling combined with class weights improved recall for all three classifiers, the F1-score did not improve (Table 3).",
-      "score": 0.3333
+      "page": 7,
+      "quote": "We trained and evaluated deep neural network classifiers by fine-tuning BERT-based models in the Hugging Face [16] library that were pre-trained on corpora in general domains (DistilBERT-Base [18], BERT-Base [15], and RoBERTa-Large [19]), biomedical domains (BioBERT [20], BiomedBERT-Large-Abstract [21], and BiomedBERT-Base-Abstract-Fulltext [22]), and, more specifically, COVID-19 domains (COVID-SciBERT [23] and COVID-Twitter-BERT [24]) (Figure 1).",
+      "score": 0.5
     },
     {
       "page": 5,
-      "quote": "We evaluated precision by manually annotating true and false positives among the sentences that the classifier predicted as providing evidence that the study had generated SARS-CoV-2 sequences.",
+      "quote": "As a baseline, we trained and evaluated a support vector machine (SVM) classifier, using the LibSVM [13] implementation in Weka.",
+      "score": 0.3333
+    },
+    {
+      "page": 2,
+      "quote": "Results: BERT-based models that were pre-trained on corpora in biomedical or, more specifically, COVID-19 domains outperformed those that were pre-trained on corpora in general domains for detecting reports of patient metadata associated with SARS-CoV-2 sequences, achieving the best performance with a classifier based on a BiomedBERT-Large-Abstract model (F1 score = 0.776).",
+      "score": 0.3333
+    },
+    {
+      "page": 4,
+      "quote": "We evaluated the classifiers based on the F1-score for the \"positive\" class: F1-score = 2 * (precision * recall) / (precision + recall).",
       "score": 0.25
     }
   ],
@@ -36,9 +36,9 @@
     "chat_model": "gemma4:e4b",
     "embedding_model": "intfloat/multilingual-e5-large",
     "retrieved_chunks": 5,
-    "rewritten_query": "What classifier models were used in the experiments?",
+    "rewritten_query": "What classifier models were used?",
     "tokens": null,
-    "latency_ms": 15227,
-    "timestamp": "2026-07-31T08:26:48Z"
+    "latency_ms": 27801,
+    "timestamp": "2026-07-31T08:43:10Z"
   }
 }

@@ -7,8 +7,6 @@ __pycache__/
 # Local secrets — .env.example IS committed, .env is NOT
 .env
 
-.claude/*
-
 # OS / editors
 .DS_Store
 .idea/
@@ -19,7 +17,7 @@ data/out/*
 !data/out/.gitkeep
 
 # Qdrant local storage (when running without Docker)
-data/qdrant/collection/aim_hackathon/*
+data/qdrant/collection/aim_hackathon/storage.sqlite
 
 # COMMITTED on purpose:
 #   - data/in/  (your chosen PDF — the organisers check answers against it)

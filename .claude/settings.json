@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run *)",
+      "Bash(pkill -f \"uvicorn\\\\|fastapi\")",
+      "Bash(uv add *)",
+      "Bash(uv run python -c ' *)"
+    ]
+  }
+}
