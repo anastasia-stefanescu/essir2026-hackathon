@@ -44,6 +44,16 @@ class Settings(BaseSettings):
     # --- Retrieval ----------------------------------------------------------
     top_k: int = 5  # how many results a query retrieves
 
+    # Search mode: "dense" (default), "sparse", or "hybrid" (dense + sparse via RRF).
+    # Changing from "dense" requires a full re-ingest with reset=true.
+    search_mode: str = "dense"
+
+    # Sparse encoder backend (only used when search_mode != "dense"):
+    #   "fastembed"  -> prithivida/Splade_PP_en_v1 via fastembed (lightweight)
+    #   "splade"     -> SPLADE via transformers (higher quality, larger model)
+    #   "tfidf"      -> TF-IDF via sklearn (no model download, lowest quality)
+    sparse_encoder: str = "fastembed"
+
     # Chunking is OFF by default: ingest indexes one vector per page (see
     # app/rag/chunking.py). When you implement real chunking, these are your dials.
     chunk_size: int = 800  # characters per chunk (once you chunk)
