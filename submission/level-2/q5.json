@@ -1,1 +1,44 @@
-{}
+{
+  "question_id": "q470bd3",
+  "level": 2,
+  "question": "Why did the second kind of difficulty happen? ",
+  "answer": "The difficulty arose because:\n\n1.  Articles reporting the generation of SARS-CoV-2 sequences were relatively sparse.\n2.  This sparsity required the authors to prioritize high recall, a decision that resulted in an increase in false positive articles.\n3.  Furthermore, manual evaluation of recall was deemed infeasible because annotated sentences in keyword-matched articles often did not provide evidence of generating SARS-CoV-2 sequences.",
+  "conversation_id": "level-2",
+  "sources": [
+    {
+      "page": 16,
+      "quote": "The primary limitation of this study is that our evaluation of the classifiers for detecting reports of patient metadata was based only on the manually validated output of the first classifier in our pipeline—that is, true positive articles that reported generating SARS-CoV-2 sequences.",
+      "score": 0.8803
+    },
+    {
+      "page": 5,
+      "quote": "annotated sentences in the keyword-matched articles did not provide evidence of generating SARS-CoV-2 sequences, it would not have been feasible to evaluate recall by manually.",
+      "score": 0.8603
+    },
+    {
+      "page": 4,
+      "quote": "her the articles reported generating SARS-CoV-2 sequences—in particular, generating original sequences for the present study, as opposed to using sequences generated in a prior study—and identify specific sentences that provided evidence of such.",
+      "score": 0.8547
+    },
+    {
+      "page": 2,
+      "quote": "While millions of SARS-CoV-2 genome sequences from patients worldwide have been digitally deposited in public databases such as GISAID [2] and GenBank [3], the patient metadata associated with the sequences are often not available in the databases [4, 5].",
+      "score": 0.8547
+    },
+    {
+      "page": 6,
+      "quote": "We manually validated the articles in LitCovid [9] for which the deployed classifier predicted the presence of sentences that provided evidence of generating SARS-CoV-2 sequences, and randomly sampled 150 of them for further manual annotation using the INCEpTION platform [11] (Figure 1).",
+      "score": 0.8536
+    }
+  ],
+  "diagnostics": {
+    "provider": "ollama",
+    "chat_model": "gemma4:e4b",
+    "embedding_model": "intfloat/multilingual-e5-large",
+    "retrieved_chunks": 5,
+    "rewritten_query": "What caused the evaluation limitation due to data sparsity regarding SARS-CoV-2 sequence generation?",
+    "tokens": null,
+    "latency_ms": 27936,
+    "timestamp": "2026-07-31T07:45:40Z"
+  }
+}

@@ -17,7 +17,6 @@ class Context:
     text: str
     page: int
     score: float
-    title: str = ""
 
 
 def rewrite_query(question: str, history: list[Message]) -> str:
@@ -83,7 +82,6 @@ def retrieve(question: str, top_k: int, history: list[Message] | None = None) ->
             text=str(h.payload.get("text", "")),
             page=int(h.payload.get("page", 0)),
             score=float(h.score),
-            title=str(h.payload.get("title", "")),
         )
         for h in hits
     ]

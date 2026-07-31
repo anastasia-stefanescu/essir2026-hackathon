@@ -1,1 +1,49 @@
-{}
+{
+  "question_id": "q2c3ead",
+  "level": 1,
+  "question": "In experiments with large language models, which method had the best performance? ",
+  "answer": "Among the generative AI approaches tested with large language models, **few-shot prompting combined with chain-of-thought prompting** achieved the highest performance, resulting in an F1-score of 0.558.\n\nHowever, the context notes that even this best-performing generative AI approach was outperformed by all machine learning-based classifiers that used manually annotated training data (the classifier based on BiomedBERT-Large-Abstract, for example, achieved an F1-score of 0.776).",
+  "conversation_id": "level-1",
+  "sources": [
+    {
+      "page": 7,
+      "quote": "We also fine-tuned the Llama-3-8B [25] large language model (LLM), using 10 epochs and a learning rate of 5e-5.",
+      "score": 0.8286,
+      "title": "[2.3.2. Classification]"
+    },
+    {
+      "page": 12,
+      "quote": "Based on the 4429 sentences in the held-out test set, zero-shot prompting of an LLM (Llama-3-70B [25]) achieved an F1-score of 0.482 (Table 4).",
+      "score": 0.8123,
+      "title": "[3.2.2. Evaluation of LLM prompting]"
+    },
+    {
+      "page": 5,
+      "quote": "To address the class imbalance, we performed an additional experiment with the BERT-based classifier in which we under-sampled the \"negative\" (i.e., majority) class in the training set by removing sentences that were not similar to any of the sentences in the \"positive\" (i.e., the minority) class.",
+      "score": 0.8085,
+      "title": "[2.2.2. Classification]"
+    },
+    {
+      "page": 7,
+      "quote": "We also fine-tuned the Llama-3-8B [25] large language model (LLM), using 10 epochs and a learning rate of 5e-5.",
+      "score": 0.8068,
+      "title": "[2.3.2. Classification]"
+    },
+    {
+      "page": 11,
+      "quote": "Based on the 4429 sentences in the held-out test set, fine-tuned models that were pre-trained on corpora in biomedical domains (BioBERT [20], BiomedBERT-Large-Abstract [21], and BiomedBERT-Base-Abstract-Fulltext [22]) or, more specifically, COVID-19 domains (COVID-SciBERT [23] and COVID-Twitter-BERT [24]) outperformed those that were pre-trained on corpora in general domains (DistilBERT-Base [18], BERT-Base [15], and RoBERTa-Large [19]) for detecting sentences that reported patient metadata associated with SARS-CoV-2 sequences, including the Llama-3-8B [25] LLM (Table 2).",
+      "score": 0.8045,
+      "title": "[3.1.3. Error analysis] [3.2.1. Evaluation of fine-tuned models]"
+    }
+  ],
+  "diagnostics": {
+    "provider": "ollama",
+    "chat_model": "gemma4:e4b",
+    "embedding_model": "intfloat/multilingual-e5-large",
+    "retrieved_chunks": 5,
+    "rewritten_query": "Which method performed best in large language model experiments?",
+    "tokens": null,
+    "latency_ms": 20477,
+    "timestamp": "2026-07-31T07:35:25Z"
+  }
+}

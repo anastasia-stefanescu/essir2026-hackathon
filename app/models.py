@@ -28,11 +28,6 @@ class Source(BaseModel):
     score: float | None = Field(
         None, description="retrieval score, if you have one", examples=[0.83]
     )
-    title: str | None = Field(
-        None,
-        description="section breadcrumb from the document structure",
-        examples=["2. Methods > 2.2.1. Annotation"],
-    )
 
 
 class Diagnostics(BaseModel):

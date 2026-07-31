@@ -1,1 +1,44 @@
-{}
+{
+  "question_id": "qcbc7a6",
+  "level": 1,
+  "question": "What would be the future work for this project? ",
+  "answer": "Future work for the project includes several planned enhancements:\n\n1.  **Improving LLM Prompts:** Researchers plan to boost performance by modifying how patient metadata is handled in instructions given to Large Language Models (LLMs). Specifically, they intend to remove the general term \"patient metadata\" from predefinitions and instead embed specific types of that metadata directly into the prompt. They will also clarify instances where the LLMs previously misunderstood certain types of metadata, such as lab results.\n2.  **Model Comparison:** Additionally, the study suggests that fine-tuning BERT-based models using manually annotated training data may surpass LLM prompting when performing classification tasks involving complex concepts like patient metadata.",
+  "conversation_id": "level-1",
+  "sources": [
+    {
+      "page": 16,
+      "quote": "In contrast, the input to our human-in-the-loop approach would likely be much smaller for particular applications of genomic epidemiology in real-time.",
+      "score": 0.5
+    },
+    {
+      "page": 16,
+      "quote": "potentially improving the performance of the prompts in future work.",
+      "score": 0.5
+    },
+    {
+      "page": 1,
+      "quote": "aDepartment of Biostatistics, Epidemiology, and Informatics, University of Pennsylvania, Philadelphia, PA, USA.",
+      "score": 0.3333
+    },
+    {
+      "page": 15,
+      "quote": "More generally, the results of this study suggest that fine-tuning BERTbased models using manually annotated training data may outperform LLM prompting for classification tasks involving complex concepts, such as patient metadata.",
+      "score": 0.3333
+    },
+    {
+      "page": 21,
+      "quote": "URL https://dl.acm.org/doi/10.5555/1953048.2078195.",
+      "score": 0.25
+    }
+  ],
+  "diagnostics": {
+    "provider": "ollama",
+    "chat_model": "gemma4:e4b",
+    "embedding_model": "intfloat/multilingual-e5-large",
+    "retrieved_chunks": 5,
+    "rewritten_query": "What is the future work for this project?",
+    "tokens": null,
+    "latency_ms": 12937,
+    "timestamp": "2026-07-31T08:23:42Z"
+  }
+}

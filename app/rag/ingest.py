@@ -147,10 +147,9 @@ def _chunks_from_marker_json(path: Path, chunk_size: int, chunk_overlap: int) ->
                     page_chunks[-1].text = page_chunks[-1].text + "\n" + raw
                 elif len(raw) >= 40:
                     breadcrumb = _breadcrumb(block)
-                    title = breadcrumb
                     full_text = f"{breadcrumb} {raw}" if (breadcrumb and embed_breadcrumbs) else raw
                     for window in _sliding(full_text):
-                        page_chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
+                        page_chunks.append(Chunk(text=window, page=page_no, index=idx))
                         idx += 1
                 continue
 
@@ -158,11 +157,10 @@ def _chunks_from_marker_json(path: Path, chunk_size: int, chunk_overlap: int) ->
                 continue
 
             breadcrumb = _breadcrumb(block)
-            title = breadcrumb
             full_text = f"{breadcrumb} {raw}" if (breadcrumb and embed_breadcrumbs) else raw
 
             for window in _sliding(full_text):
-                page_chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
+                page_chunks.append(Chunk(text=window, page=page_no, index=idx))
                 idx += 1
 
         # Append footnotes to the last body chunk on this page
@@ -250,7 +248,7 @@ def ingest(filename: str | None = None, reset: bool = False) -> IngestResponse:
                 if sparse_vecs is not None
                 else vec
             ),
-            payload={"text": c.text, "page": c.page, "source": path.name, "title": c.title},
+            payload={"text": c.text, "page": c.page, "source": path.name},
         )
         for i, (c, vec) in enumerate(zip(chunks, vectors))
     ]

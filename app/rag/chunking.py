@@ -19,7 +19,6 @@ class Chunk:
     text: str
     page: int  # 1-indexed
     index: int  # position within the document
-    title: str = ""  # breadcrumb path, e.g. "2. Methods > 2.2.1. Annotation"
 
 
 # Matches any markdown heading line: #, ##, ###, etc.
@@ -106,7 +105,7 @@ def _chunk_markdown(pages: list[str], chunk_size: int, chunk_overlap: int) -> li
         title = f"{breadcrumb} [{inline_label.group(1)}]" if inline_label else breadcrumb
         full_text = f"{breadcrumb} {body}" if breadcrumb else body
         for window in _sliding_window(full_text, chunk_size, chunk_overlap):
-            chunks.append(Chunk(text=window, page=page_no, index=idx, title=title))
+            chunks.append(Chunk(text=window, page=page_no, index=idx))
             idx += 1
 
     return chunks
